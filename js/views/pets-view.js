@@ -151,10 +151,10 @@ window.PetsView = {
                   </td>
                   <td>
                     <select class="status-select status-${pet.status}" data-pet-id="${pet.id}">
-                      <option value="safe" ${pet.status === 'safe' ? 'selected' : ''}>🟢 Safe</option>
-                      <option value="impounded" ${pet.status === 'impounded' ? 'selected' : ''}>🟠 Impounded</option>
-                      <option value="reunited" ${pet.status === 'reunited' ? 'selected' : ''}>🔵 Reunited</option>
-                      <option value="lost" ${pet.status === 'lost' ? 'selected' : ''}>🔴 Lost / Missing</option>
+                      <option value="safe" ${pet.status === 'safe' ? 'selected' : ''}>Safe</option>
+                      <option value="impounded" ${pet.status === 'impounded' ? 'selected' : ''}>Impounded</option>
+                      <option value="reunited" ${pet.status === 'reunited' ? 'selected' : ''}>Reunited</option>
+                      <option value="lost" ${pet.status === 'lost' ? 'selected' : ''}>Lost / Missing</option>
                     </select>
                   </td>
                   <td>
@@ -260,7 +260,7 @@ window.PetsView = {
                       <div style="display: flex; flex-direction: column; gap: 3px;">
                         <div>
                           <span class="status-pill ${r.status === 'registered_promoted' ? 'status-safe' : 'status-impounded'}" style="font-size: 9.5px; padding: 2px 7px;">
-                            ${r.status === 'registered_promoted' ? '🟢 Promoted to Registry' : (r.status === 'resolved' ? '🔵 Resolved' : (r.status === 'under_review' ? '🟡 Under Review' : (r.status === 'shelter_intake' ? '🔵 Shelter Intake' : '🟠 Sighting / Found')))}
+                            ${r.status === 'registered_promoted' ? 'Promoted to Registry' : (r.status === 'resolved' ? 'Resolved' : (r.status === 'under_review' ? 'Under Review' : (r.status === 'shelter_intake' ? 'Shelter Intake' : 'Sighting / Found')))}
                           </span>
                         </div>
                         <div>
@@ -544,10 +544,10 @@ window.PetsView = {
           <div class="form-group">
             <label class="form-label">Report Status</label>
             <select class="form-control" name="status" style="font-weight: 700;">
-              <option value="active_sighting" ${report.status === 'active_sighting' || !report.status ? 'selected' : ''}>🟠 Active Sighting / Found</option>
-              <option value="under_review" ${report.status === 'under_review' ? 'selected' : ''}>🟡 Under Municipal Review</option>
-              <option value="shelter_intake" ${report.status === 'shelter_intake' ? 'selected' : ''}>🔵 Transferred to Shelter</option>
-              <option value="resolved" ${report.status === 'resolved' || report.status === 'registered_promoted' ? 'selected' : ''}>🟢 Resolved / Claimed</option>
+              <option value="active_sighting" ${report.status === 'active_sighting' || !report.status ? 'selected' : ''}>Active Sighting / Found</option>
+              <option value="under_review" ${report.status === 'under_review' ? 'selected' : ''}>Under Municipal Review</option>
+              <option value="shelter_intake" ${report.status === 'shelter_intake' ? 'selected' : ''}>Transferred to Shelter</option>
+              <option value="resolved" ${report.status === 'resolved' || report.status === 'registered_promoted' ? 'selected' : ''}>Resolved / Claimed</option>
             </select>
           </div>
           <div class="form-group form-full">
@@ -648,7 +648,7 @@ window.PetsView = {
           ${(report.comments || report.finderNotes || report.notes) ? `<div><b>Notes:</b> "${report.comments || report.finderNotes || report.notes}"</div>` : ''}
         </div>
         <p style="font-size: 11.5px; color: var(--ink-muted); margin: 0; line-height: 1.45;">
-          ⚠️ This will remove the stray pet report from the community incident map and admin records.
+          This will remove the stray pet report from the community incident map and admin records.
         </p>
       </div>
       <div class="modal-footer" style="justify-content: flex-end; gap: 8px;">
@@ -819,7 +819,7 @@ window.PetsView = {
           <div><b>Owner:</b> ${pet.owner ? pet.owner.name : 'Unknown'} (${pet.owner ? pet.owner.phone : 'No phone'})</div>
         </div>
         <p style="font-size: 11.5px; color: var(--ink-muted); margin: 0; line-height: 1.45;">
-          ⚠️ This will remove the pet's registration profile and instantly release its RFID collar back into inventory.
+          This will remove the pet's registration profile and instantly release its RFID collar back into inventory.
         </p>
       </div>
       <div class="modal-footer" style="justify-content: flex-end; gap: 8px;">
@@ -1040,10 +1040,10 @@ window.PetsView = {
           <div class="form-group">
             <label class="form-label">Initial Status</label>
             <select class="form-control" name="status" style="font-weight: 700;">
-              <option value="safe" ${initialData?.status === 'safe' || !initialData ? 'selected' : ''}>🟢 SAFE (Home)</option>
-              <option value="impounded" ${initialData?.status === 'impounded' ? 'selected' : ''}>🟠 IMPOUNDED</option>
-              <option value="reunited" ${initialData?.status === 'reunited' ? 'selected' : ''}>🔵 REUNITED</option>
-              <option value="lost" ${initialData?.status === 'lost' ? 'selected' : ''}>🔴 LOST</option>
+              <option value="safe" ${initialData?.status === 'safe' || !initialData ? 'selected' : ''}>SAFE (Home)</option>
+              <option value="impounded" ${initialData?.status === 'impounded' ? 'selected' : ''}>IMPOUNDED</option>
+              <option value="reunited" ${initialData?.status === 'reunited' ? 'selected' : ''}>REUNITED</option>
+              <option value="lost" ${initialData?.status === 'lost' ? 'selected' : ''}>LOST</option>
             </select>
           </div>
           <div class="form-group form-full">

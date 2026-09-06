@@ -126,18 +126,18 @@ window.ActivationView = {
     } else {
       // Monthly with realistic seasonal spikes (New Year fireworks spike in Jan & Dec)
       chartData = [
-        { label: 'Jan', val: 38, spike: true, spikeText: '🎆 Fireworks Spike' },
+        { label: 'Jan', val: 38, spike: true, spikeText: 'Fireworks Peak' },
         { label: 'Feb', val: 14 },
         { label: 'Mar', val: 11 },
-        { label: 'Apr', val: 18, sub: '🔥 Summer' },
+        { label: 'Apr', val: 18, sub: 'Summer' },
         { label: 'May', val: 15 },
         { label: 'Jun', val: 13 },
-        { label: 'Jul', val: 22, sub: '🌧️ Monsoon' },
+        { label: 'Jul', val: 22, sub: 'Monsoon' },
         { label: 'Aug', val: 19 },
         { label: 'Sep', val: Math.max(totalIncidentVolume, 16), active: true },
         { label: 'Oct', val: 13 },
         { label: 'Nov', val: 16 },
-        { label: 'Dec', val: 31, spike: true, spikeText: '🎆 Holiday Putok' }
+        { label: 'Dec', val: 31, spike: true, spikeText: 'Holiday Surge' }
       ];
     }
 
@@ -151,10 +151,10 @@ window.ActivationView = {
     const stepNotReunited = Math.max(stepFoundImpounded - stepReunited, 2);
 
     const recoveryFunnelSteps = [
-      { name: 'Missing Reported', count: baseMissing, percent: 100, color: '#dc2626', icon: '🚨' },
-      { name: 'Community Sighted', count: stepSighted, percent: Math.round((stepSighted / baseMissing) * 100), color: '#ea580c', icon: '📍' },
-      { name: 'Found / Impounded', count: stepFoundImpounded, percent: Math.round((stepFoundImpounded / baseMissing) * 100), color: '#2563eb', icon: '🏛️' },
-      { name: 'Reunited with Guardian', count: stepReunited, percent: Math.round((stepReunited / baseMissing) * 100), color: '#16a34a', icon: '🎉' }
+      { name: 'Missing Reported', count: baseMissing, percent: 100, color: '#dc2626' },
+      { name: 'Community Sighted', count: stepSighted, percent: Math.round((stepSighted / baseMissing) * 100), color: '#ea580c' },
+      { name: 'Found / Impounded', count: stepFoundImpounded, percent: Math.round((stepFoundImpounded / baseMissing) * 100), color: '#2563eb' },
+      { name: 'Reunited with Guardian', count: stepReunited, percent: Math.round((stepReunited / baseMissing) * 100), color: '#16a34a' }
     ];
 
     const maxRecoveryCount = recoveryFunnelSteps[0].count;
@@ -304,7 +304,7 @@ window.ActivationView = {
             <div class="analytics-kpi-block">
               <div class="analytics-kpi-main-val" style="color: #dc2626;">+185% Spike</div>
               <div class="analytics-kpi-sub warning">
-                <span>🎆 New Year Fireworks Season Peak</span>
+                <span>New Year Fireworks Season Peak</span>
               </div>
             </div>
           </div>
@@ -321,7 +321,7 @@ window.ActivationView = {
                 const heightPercent = Math.max(Math.round((item.val / maxChartVal) * 100), 8);
                 return `
                   <div class="analytics-bar-col" data-period="${item.label}" title="${item.label}: ${item.val} Incidents${item.spikeText ? ' (' + item.spikeText + ')' : ''}">
-                    ${item.spike ? `<span class="seasonal-spike-badge">${item.spikeText || '🎆 Spike'}</span>` : ''}
+                    ${item.spike ? `<span class="seasonal-spike-badge">${item.spikeText || 'Peak'}</span>` : ''}
                     <div class="analytics-bar ${item.spike ? 'seasonal-spike' : ''} ${item.active ? 'active-period' : ''}" style="height: ${heightPercent}%;"></div>
                     <span class="analytics-bar-label">
                       ${item.label}
@@ -380,9 +380,8 @@ window.ActivationView = {
                 <div class="funnel-step">
                   <div>
                     <div class="funnel-step-head">
-                      <span style="display: flex; align-items: center; gap: 5px; font-weight: 650; color: var(--ink-primary);">
-                        <span>${step.icon}</span>
-                        <span>${step.name}</span>
+                      <span style="font-weight: 650; color: var(--ink-primary);">
+                        ${step.name}
                       </span>
                       <span class="funnel-step-count">${step.count}</span>
                     </div>
@@ -408,7 +407,7 @@ window.ActivationView = {
           <!-- Quick Resolution Statistics -->
           <div class="analytics-footer-summary" style="margin-top: 4px;">
             <span style="color: var(--ink-secondary); font-size: 11.5px;">Unresolved in Holding: <b style="color: var(--ink-primary);">${stepNotReunited} Pets</b></span>
-            <span style="color: #16a34a; font-weight: 700; font-size: 11.5px;">✓ Reunited: ${stepReunited} Pets</span>
+            <span style="color: #16a34a; font-weight: 700; font-size: 11.5px;">Reunited: ${stepReunited} Pets</span>
           </div>
         </div>
 

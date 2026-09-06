@@ -436,14 +436,14 @@ class AdminApp {
     const toast = document.createElement('div');
     toast.className = `toast-item ${type}`;
 
-    let icon = 'ℹ️';
-    if (type === 'success') icon = '✓';
-    if (type === 'error') icon = '✕';
-    if (type === 'warning') icon = '⚠️';
+    let iconSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>';
+    if (type === 'success') iconSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
+    if (type === 'error') iconSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+    if (type === 'warning') iconSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
 
     toast.innerHTML = `
-      <span style="font-weight: 800; font-size: 13px;">${icon}</span>
-      <span style="flex: 1; line-height: 1.35;">${message}</span>
+      <span style="display: inline-flex; align-items: center; flex-shrink: 0;">${iconSvg}</span>
+      <span style="flex: 1; line-height: 1.35; font-size: 12px;">${message}</span>
     `;
 
     container.appendChild(toast);

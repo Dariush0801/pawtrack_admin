@@ -123,7 +123,7 @@ window.RfidView = {
                   </td>
                   <td>
                     <span style="font-family: var(--font-mono); font-weight: 700; color: ${parseInt(tag.battery, 10) < 85 ? 'var(--color-amber)' : 'var(--color-green)'};">
-                      ⚡ ${tag.battery || '100%'}
+                      ${tag.battery || '100%'}
                     </span>
                   </td>
                   <td>

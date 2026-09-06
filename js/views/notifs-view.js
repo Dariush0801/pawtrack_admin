@@ -67,8 +67,12 @@ window.NotifsView = {
           ` : notifs.map(n => `
             <div style="display: flex; justify-content: space-between; align-items: flex-start; padding: 12px 18px; border-bottom: 1px solid var(--border-light); background: ${n.read ? 'transparent' : 'var(--brand-terracotta-subtle)'};">
               <div style="display: flex; gap: 12px; align-items: flex-start; min-width: 0;">
-                <span style="font-size: 16px; margin-top: 2px;">
-                  ${n.type === 'impound_alert' ? '🚨' : n.type === 'reunited' ? '🎉' : '📢'}
+                <span style="display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 6px; background: var(--bg-card-subtle); border: 1px solid var(--border-main); color: ${n.type === 'impound_alert' ? 'var(--color-red)' : (n.type === 'reunited' ? 'var(--color-green)' : 'var(--brand-terracotta)')}; flex-shrink: 0; margin-top: 2px;">
+                  ${n.type === 'impound_alert' 
+                    ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' 
+                    : (n.type === 'reunited' 
+                      ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 6 9 17 4 12"/></svg>' 
+                      : '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>')}
                 </span>
                 <div style="display: flex; flex-direction: column; gap: 3px;">
                   <div style="display: flex; align-items: center; gap: 8px;">
@@ -131,9 +135,9 @@ window.NotifsView = {
             <label class="form-label">Broadcast Preset Type</label>
             <select class="form-control" id="broadcast-preset">
               <option value="custom">-- Custom Alert Message --</option>
-              <option value="flood">🚨 Severe Weather / Flood Evacuation Advisory</option>
-              <option value="rabies">💉 Free Municipal Anti-Rabies Vaccination Drive</option>
-              <option value="pound">⚠️ Scheduled Stray Animal Control Operation in Sector</option>
+              <option value="flood">Severe Weather / Flood Evacuation Advisory</option>
+              <option value="rabies">Free Municipal Anti-Rabies Vaccination Drive</option>
+              <option value="pound">Scheduled Stray Animal Control Operation in Sector</option>
             </select>
           </div>
 

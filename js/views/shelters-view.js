@@ -42,7 +42,9 @@ window.SheltersView = {
               <div>
                 <div class="nock-card-head">
                   <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="width: 24px; height: 24px; border-radius: 6px; background: var(--bg-card-subtle); border: 1px solid var(--border-main); display: grid; place-items: center; font-size: 11px;">🏛️</span>
+                    <span style="width: 24px; height: 24px; border-radius: 6px; background: var(--bg-card-subtle); border: 1px solid var(--border-main); display: grid; place-items: center; color: var(--brand-terracotta);">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    </span>
                     <span class="nock-card-title">${sh.name}</span>
                   </div>
                   <span class="mono-tag" style="font-size: 9.5px;">${sh.id}</span>
@@ -55,12 +57,12 @@ window.SheltersView = {
                   </div>
 
                   <div style="display: flex; justify-content: space-between; color: var(--ink-secondary); margin-top: 4px;">
-                    <span>📞 ${sh.phone}</span>
-                    <span>✉️ ${sh.email || 'animalcare@lgu.gov.ph'}</span>
+                    <span>Tel: ${sh.phone}</span>
+                    <span>${sh.email || 'animalcare@lgu.gov.ph'}</span>
                   </div>
 
                   <div style="display: flex; justify-content: space-between; color: var(--ink-muted); font-size: 11px; margin-top: 2px;">
-                    <span>🕒 ${sh.hours || 'Mon-Fri 8am-5pm'}</span>
+                    <span>Hours: ${sh.hours || 'Mon-Fri 8am-5pm'}</span>
                     <span style="font-weight: 700; color: var(--brand-terracotta);">${sh.fee || 'PHP 500 / day'}</span>
                   </div>
                 </div>
