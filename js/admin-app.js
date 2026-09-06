@@ -30,6 +30,76 @@ class AdminApp {
 
     this.updateSidebarBadges();
     this.updateSyncIndicator();
+    this.initPeriodSelector();
+  }
+
+  initPeriodSelector() {
+    const periodBtn = document.getElementById('btn-topbar-period');
+    const periodDropdown = document.getElementById('period-dropdown');
+    const periodLabel = document.getElementById('topbar-period-label');
+    const customStart = document.getElementById('custom-date-start');
+    const customEnd = document.getElementById('custom-date-end');
+    const applyCustomBtn = document.getElementById('btn-apply-custom-period');
+
+    if (!periodBtn || !periodDropdown) return;
+
+    this.selectedPeriod = '15–29 Aug';
+
+    // Toggle dropdown
+    periodBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      document.getElementById('admin-user-dropdown')?.classList.remove('open');
+      periodDropdown.classList.toggle('open');
+    });
+
+    // Close on outside click
+    document.addEventListener('click', (e) => {
+      if (!periodDropdown.contains(e.target) && e.target !== periodBtn && !periodBtn.contains(e.target)) {
+        periodDropdown.classList.remove('open');
+      }
+    });
+
+    // Option clicks
+    periodDropdown.querySelectorAll('.period-option-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const range = btn.getAttribute('data-range');
+        const label = btn.getAttribute('data-label') || `${range} ▾`;
+
+        periodDropdown.querySelectorAll('.period-option-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        this.selectedPeriod = range;
+        if (periodLabel) periodLabel.textContent = label;
+        periodDropdown.classList.remove('open');
+
+        this.showToast(`Reporting window updated to: ${range}`, 'success', 2200);
+
+        // Re-render current route to reflect active filter window
+        if (this.currentRoute) {
+          this.renderView(this.currentRoute);
+        }
+      });
+    });
+
+    // Custom date apply
+    applyCustomBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const start = customStart?.value;
+      const end = customEnd?.value;
+      if (!start || !end) {
+        this.showToast('Please select valid start and end dates', 'warning');
+        return;
+      }
+      const formatted = `${start.slice(5)} – ${end.slice(5)}`;
+      this.selectedPeriod = `${start} to ${end}`;
+      if (periodLabel) periodLabel.textContent = `${formatted} ▾`;
+      periodDropdown.classList.remove('open');
+      this.showToast(`Custom telemetry window: ${start} to ${end}`, 'success', 2200);
+
+      if (this.currentRoute) {
+        this.renderView(this.currentRoute);
+      }
+    });
   }
 
   initUserMenu() {
@@ -43,6 +113,7 @@ class AdminApp {
 
     avatarTrigger.addEventListener('click', (e) => {
       e.stopPropagation();
+      document.getElementById('period-dropdown')?.classList.remove('open');
       dropdown.classList.toggle('open');
     });
 
