@@ -93,14 +93,14 @@ window.PetsView = {
             <span style="font-weight: 700; font-size: 13px; color: var(--ink-primary);">Registered Pets</span>
           </div>
 
-          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-            <div class="table-search" style="height: 32px; font-size: 11.5px;">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--ink-muted);"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">
+            <div class="table-search" style="height: 30px; font-size: 11.5px; box-sizing: border-box;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--ink-muted); flex-shrink: 0;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
               <input type="text" id="pet-search-input" placeholder="Search by name, RFID, microchip, owner..." value="${this.petSearchQuery || ''}" style="font-size: 11.5px;" />
-              ${this.petSearchQuery ? `<button id="btn-clear-pet-search" style="border:none;background:transparent;cursor:pointer;color:var(--ink-muted);font-size:12px;">&times;</button>` : ''}
+              ${this.petSearchQuery ? `<button id="btn-clear-pet-search" style="border:none;background:transparent;cursor:pointer;color:var(--ink-muted);font-size:12px;padding:0 2px;">&times;</button>` : ''}
             </div>
 
-            <div class="table-filters">
+            <div class="table-filters" style="box-sizing: border-box;">
               <button class="filter-pill ${this.currentFilter === 'all' ? 'active' : ''}" data-pet-filter="all">All</button>
               <button class="filter-pill ${this.currentFilter === 'safe' ? 'active' : ''}" data-pet-filter="safe">Safe</button>
               <button class="filter-pill ${this.currentFilter === 'impounded' ? 'active' : ''}" data-pet-filter="impounded">Impounded</button>
@@ -191,14 +191,14 @@ window.PetsView = {
             <span style="font-weight: 700; font-size: 13px; color: var(--ink-primary);">Unregistered Reports (Found / Stray)</span>
           </div>
 
-          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-            <div class="table-search" style="height: 32px; font-size: 11.5px;">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--ink-muted);"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">
+            <div class="table-search" style="height: 30px; font-size: 11.5px; box-sizing: border-box;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--ink-muted); flex-shrink: 0;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
               <input type="text" id="report-search-input" placeholder="Search reports by species, breed, location, finder..." value="${this.reportSearchQuery || ''}" style="font-size: 11.5px;" />
-              ${this.reportSearchQuery ? `<button id="btn-clear-report-search" style="border:none;background:transparent;cursor:pointer;color:var(--ink-muted);font-size:12px;">&times;</button>` : ''}
+              ${this.reportSearchQuery ? `<button id="btn-clear-report-search" style="border:none;background:transparent;cursor:pointer;color:var(--ink-muted);font-size:12px;padding:0 2px;">&times;</button>` : ''}
             </div>
 
-            <div class="table-filters">
+            <div class="table-filters" style="box-sizing: border-box;">
               <button class="filter-pill ${this.reportFilter === 'all' ? 'active' : ''}" data-report-filter="all">All</button>
               <button class="filter-pill ${this.reportFilter === 'active_sighting' ? 'active' : ''}" data-report-filter="active_sighting">Active Sightings</button>
               <button class="filter-pill ${this.reportFilter === 'under_review' ? 'active' : ''}" data-report-filter="under_review">Under Review</button>
