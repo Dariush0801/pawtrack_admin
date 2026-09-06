@@ -151,10 +151,10 @@ window.ActivationView = {
     const stepNotReunited = Math.max(stepFoundImpounded - stepReunited, 2);
 
     const recoveryFunnelSteps = [
-      { name: 'Missing Reported', count: baseMissing, percent: 100, color: '#dc2626' },
-      { name: 'Community Sighted', count: stepSighted, percent: Math.round((stepSighted / baseMissing) * 100), color: '#ea580c' },
-      { name: 'Found / Impounded', count: stepFoundImpounded, percent: Math.round((stepFoundImpounded / baseMissing) * 100), color: '#2563eb' },
-      { name: 'Reunited with Guardian', count: stepReunited, percent: Math.round((stepReunited / baseMissing) * 100), color: '#16a34a' }
+      { name: 'Missing Reported', count: baseMissing, percent: 100, color: '#c2410c' },
+      { name: 'Community Sighted', count: stepSighted, percent: Math.round((stepSighted / baseMissing) * 100), color: '#c2410c' },
+      { name: 'Found / Impounded', count: stepFoundImpounded, percent: Math.round((stepFoundImpounded / baseMissing) * 100), color: '#c2410c' },
+      { name: 'Reunited with Guardian', count: stepReunited, percent: Math.round((stepReunited / baseMissing) * 100), color: '#15803d' }
     ];
 
     const maxRecoveryCount = recoveryFunnelSteps[0].count;
