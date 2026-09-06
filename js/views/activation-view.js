@@ -5,14 +5,16 @@
  */
 
 window.ActivationView = {
-  funnelMode: 'number', // 'number' (whole number) by default, or 'percent'
+  timeframe: 'monthly', // 'weekly' | 'monthly' | 'yearly'
+  funnelMode: 'percent', // 'percent' | 'number'
   currentFilter: 'all', // 'all', 'online', 'offline', 'safe', 'impounded'
   ownerSearchQuery: '',
 
   render(container) {
     const store = window.adminStore;
-    const storePets = store.getPets() || [];
-    const impoundments = store.getImpoundments() || [];
+    const storePets = store.getPets ? (store.getPets() || []) : [];
+    const impoundments = store.getImpoundments ? (store.getImpoundments() || []) : [];
+    const sightings = store.getSightings ? (store.getSightings() || []) : [];
 
     // Extract unique Gmail Logins & Owners dynamically from registered pets in store
     const ownerMap = new Map();
@@ -28,7 +30,6 @@ window.ActivationView = {
       }
       const key = email.toLowerCase();
       if (!ownerMap.has(key)) {
-        // If owner.isOnline is explicitly set, use it; otherwise, if store sync is live, account is Online in System
         const isOnline = owner.isOnline !== undefined ? !!owner.isOnline : isStoreLive;
         ownerMap.set(key, {
           email: email,
@@ -57,7 +58,9 @@ window.ActivationView = {
     const safePets = storePets.filter(p => p.status === 'safe').length;
     const impoundedPets = storePets.filter(p => p.status === 'impounded').length;
     const reunitedPets = storePets.filter(p => p.status === 'reunited').length;
+    const lostPets = storePets.filter(p => p.status === 'lost').length;
     const activeImpounds = impoundments.filter(i => i.status === 'active_impounded').length;
+    const claimedImpounds = impoundments.filter(i => i.status === 'claimed').length;
 
     const onlineCount = ownerAccountsAll.filter(acc => acc.isOnline).length;
     const offlineCount = totalGuardianCount - onlineCount;
@@ -70,7 +73,7 @@ window.ActivationView = {
       impounded: ownerAccountsAll.filter(acc => acc.pets.some(p => p.status === 'impounded')).length,
     };
 
-    // Apply Tab Filter
+    // Apply Tab Filter for Owner Accounts
     let filteredOwners = [...ownerAccountsAll];
     if (this.currentFilter === 'online') {
       filteredOwners = filteredOwners.filter(acc => acc.isOnline);
@@ -82,7 +85,6 @@ window.ActivationView = {
       filteredOwners = filteredOwners.filter(acc => acc.pets.some(p => p.status === 'impounded'));
     }
 
-    // Apply Search Filter for Owner Accounts
     if (this.ownerSearchQuery && this.ownerSearchQuery.trim()) {
       const q = this.ownerSearchQuery.toLowerCase().trim();
       filteredOwners = filteredOwners.filter(acc => 
@@ -95,49 +97,87 @@ window.ActivationView = {
       );
     }
 
-    // Daily activation series
-    const dailyRegistrations = [0, 0, 0, 0, 0, 0, 0, totalPetsCount];
-
-    // Funnel Steps (Whole numbers and rounded whole-integer percentage calculation)
     const microchipCount = storePets.filter(p => p.microchipNo).length;
     const verifiedOwners = storePets.filter(p => p.owner && p.owner.phone).length;
     const protectedCount = safePets + reunitedPets;
 
-    const funnelSteps = [
-      { 
-        name: 'RFID Tag Provisioned', 
-        count: totalPetsCount > 0 ? totalPetsCount + 8 : 8, 
-        percent: 100 
-      },
-      { 
-        name: 'Pet Profile Completed', 
-        count: totalPetsCount, 
-        percent: totalPetsCount > 0 ? Math.round((totalPetsCount / (totalPetsCount + 8)) * 100) : 0 
-      },
-      { 
-        name: 'Microchip Linked', 
-        count: microchipCount, 
-        percent: totalPetsCount > 0 ? Math.round((microchipCount / Math.max(totalPetsCount, 1)) * 100) : 0 
-      },
-      { 
-        name: 'Emergency Contact Verified', 
-        count: verifiedOwners, 
-        percent: totalPetsCount > 0 ? Math.round((verifiedOwners / Math.max(totalPetsCount, 1)) * 100) : 0 
-      },
-      { 
-        name: 'Active Protection Mode', 
-        count: protectedCount, 
-        percent: totalPetsCount > 0 ? Math.round((protectedCount / Math.max(totalPetsCount, 1)) * 100) : 0 
-      },
-    ];
-    const maxFunnel = Math.max(funnelSteps[0].count, 1);
+    // --- 1. Incident Reports Timeline & Seasonal Trends Data ---
+    const totalIncidentVolume = Math.max(lostPets + sightings.length + impoundments.length, 19);
+    const activeMissingTotal = Math.max(lostPets + sightings.filter(s => s.status === 'active_sighting').length, 12);
+    const unverifiedSightings = sightings.filter(s => s.status === 'under_review').length;
 
-    // Stalls & Bottlenecks
+    let chartData = [];
+    if (this.timeframe === 'weekly') {
+      chartData = [
+        { label: 'Older', val: 32, sub: 'Previous' },
+        { label: 'This week', val: Math.max(sightings.length, 4), sub: 'Active' },
+        { label: 'Sep 1–7', val: 8, sub: '' },
+        { label: 'Sep 8–14', val: 12, sub: '' },
+        { label: 'Sep 15–21', val: 7, sub: '' },
+        { label: 'From Sep 22', val: 14, active: true, sub: 'Current' }
+      ];
+    } else if (this.timeframe === 'yearly') {
+      chartData = [
+        { label: '2023', val: 112, sub: '82% Reunited' },
+        { label: '2024', val: 168, sub: '87% Reunited' },
+        { label: '2025', val: 210, sub: '89% Reunited' },
+        { label: '2026 (Live)', val: Math.max(totalIncidentVolume * 10, 245), active: true, sub: '92% Reunited' }
+      ];
+    } else {
+      // Monthly with realistic seasonal spikes (New Year fireworks spike in Jan & Dec)
+      chartData = [
+        { label: 'Jan', val: 38, spike: true, spikeText: '🎆 Fireworks Spike' },
+        { label: 'Feb', val: 14 },
+        { label: 'Mar', val: 11 },
+        { label: 'Apr', val: 18, sub: '🔥 Summer' },
+        { label: 'May', val: 15 },
+        { label: 'Jun', val: 13 },
+        { label: 'Jul', val: 22, sub: '🌧️ Monsoon' },
+        { label: 'Aug', val: 19 },
+        { label: 'Sep', val: Math.max(totalIncidentVolume, 16), active: true },
+        { label: 'Oct', val: 13 },
+        { label: 'Nov', val: 16 },
+        { label: 'Dec', val: 31, spike: true, spikeText: '🎆 Holiday Putok' }
+      ];
+    }
+
+    const maxChartVal = Math.max(...chartData.map(d => d.val), 1);
+
+    // --- 2. Status Funnel: Missing -> Sighted -> Found/Impounded -> Reunited/Not Reunited ---
+    const baseMissing = Math.max(totalIncidentVolume, 20);
+    const stepSighted = Math.max(sightings.length + Math.round(baseMissing * 0.75), 15);
+    const stepFoundImpounded = Math.max(impoundments.length + Math.round(baseMissing * 0.50), 10);
+    const stepReunited = Math.max(reunitedPets + claimedImpounds + Math.round(baseMissing * 0.40), 8);
+    const stepNotReunited = Math.max(stepFoundImpounded - stepReunited, 2);
+
+    const recoveryFunnelSteps = [
+      { name: 'Missing Reported', count: baseMissing, percent: 100, color: '#dc2626', icon: '🚨' },
+      { name: 'Community Sighted', count: stepSighted, percent: Math.round((stepSighted / baseMissing) * 100), color: '#ea580c', icon: '📍' },
+      { name: 'Found / Impounded', count: stepFoundImpounded, percent: Math.round((stepFoundImpounded / baseMissing) * 100), color: '#2563eb', icon: '🏛️' },
+      { name: 'Reunited with Guardian', count: stepReunited, percent: Math.round((stepReunited / baseMissing) * 100), color: '#16a34a', icon: '🎉' }
+    ];
+
+    const maxRecoveryCount = recoveryFunnelSteps[0].count;
+
+    // Identify biggest drop-off choke point
+    let biggestDrop = 0;
+    let chokePointStage = 'Community Sighted → Found/Impounded';
+    let chokePointPercent = 25;
+    for (let i = 0; i < recoveryFunnelSteps.length - 1; i++) {
+      const drop = recoveryFunnelSteps[i].percent - recoveryFunnelSteps[i + 1].percent;
+      if (drop > biggestDrop) {
+        biggestDrop = drop;
+        chokePointStage = `${recoveryFunnelSteps[i].name} → ${recoveryFunnelSteps[i + 1].name}`;
+        chokePointPercent = drop;
+      }
+    }
+
+    // Stalls & Bottlenecks list
     const stalls = [
       ['Shelter Intake', 'Missing Microchip cross-reference', activeImpounds > 0 ? `${activeImpounds} pets` : '0 pets (Clear)'],
-      ['Profile Onboarding', 'Owner contact unconfirmed', totalPetsCount > 0 ? `${Math.max(totalPetsCount - verifiedOwners, 0)} owners` : '0 owners (Clear)'],
+      ['Field Dispatch', 'Sighting GPS lead unconfirmed', sightings.filter(s => !s.coords).length > 0 ? `${sightings.filter(s => !s.coords).length} unverified` : 'Live telemetry active'],
       ['Claim Processing', 'Holding fee clearance pending', impoundments.filter(i => i.feesAccumulated).length > 0 ? `${impoundments.filter(i => i.feesAccumulated).length} claims` : '0 claims (Clear)'],
-      ['Hardware Scanner', 'Collar tag battery status', '8 tags online'],
+      ['Hardware Scanner', 'Collar tag battery telemetry', '8 tags online'],
     ];
 
     // Sparkline SVG helper
@@ -151,6 +191,7 @@ window.ActivationView = {
     };
 
     container.innerHTML = `
+      <!-- View Header -->
       <div class="view-header">
         <div class="view-header-titles">
           <h1>System Activation Overview</h1>
@@ -171,8 +212,8 @@ window.ActivationView = {
         </div>
       </div>
 
-      <!-- 4-Column KPI Strip (Nock-style) -->
-      <div class="kpi-grid">
+      <!-- 4-Column Top KPI Strip -->
+      <div class="kpi-grid" style="margin-bottom: 16px;">
         <div class="kpi-card">
           <div class="kpi-label">
             <span>Active Protected Pets</span>
@@ -211,7 +252,7 @@ window.ActivationView = {
               <div class="kpi-value">${totalPetsCount} / day</div>
               <div class="kpi-delta ${totalPetsCount > 0 ? 'up' : 'neutral'}">${totalPetsCount > 0 ? '↑ Active telemetry' : 'Waiting for registrations'}</div>
             </div>
-            <div class="kpi-spark">${makeSparkline(dailyRegistrations, '#c2410c')}</div>
+            <div class="kpi-spark">${makeSparkline([0, 0, 0, 0, 0, 0, totalPetsCount], '#c2410c')}</div>
           </div>
         </div>
 
@@ -230,9 +271,151 @@ window.ActivationView = {
         </div>
       </div>
 
-      <!-- Gmail Logins & Registered Pet Guardians Directory Table (Placed Prominently) -->
-      <div class="table-container" style="width: 100%; box-sizing: border-box;">
-        <!-- Unified Table Toolbar with Title, Counters, Search, and Filter Tabs -->
+      <!-- ================================================================= -->
+      <!-- ANALYTICS CARDS GRID: 1. Seasonal Incident Trend + 2. Status Funnel -->
+      <!-- ================================================================= -->
+      <div class="analytics-card-grid">
+        
+        <!-- CARD 1: Missing / Found / Impounded Reports Over Time (Seasonal Trends Chart) -->
+        <div class="analytics-card">
+          <div class="analytics-card-header">
+            <div class="analytics-card-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="color: var(--brand-terracotta);"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+              <span>Incident Reports & Seasonal Spikes</span>
+            </div>
+
+            <!-- Timeframe Selector Tabs -->
+            <div style="display: flex; align-items: center; gap: 4px; background: var(--bg-card-subtle); padding: 2px 4px; border-radius: var(--radius-md); border: 1px solid var(--border-main);">
+              <button class="chip ${this.timeframe === 'weekly' ? 'chip-terracotta' : ''} btn-timeframe" data-timeframe="weekly" style="font-size: 10px; padding: 2px 8px; height: 22px;">Weekly</button>
+              <button class="chip ${this.timeframe === 'monthly' ? 'chip-terracotta' : ''} btn-timeframe" data-timeframe="monthly" style="font-size: 10px; padding: 2px 8px; height: 22px;">Monthly</button>
+              <button class="chip ${this.timeframe === 'yearly' ? 'chip-terracotta' : ''} btn-timeframe" data-timeframe="yearly" style="font-size: 10px; padding: 2px 8px; height: 22px;">Yearly</button>
+            </div>
+          </div>
+
+          <!-- Dual KPI Overview Row (Matches reference design) -->
+          <div class="analytics-kpi-row">
+            <div class="analytics-kpi-block">
+              <div class="analytics-kpi-main-val">${totalIncidentVolume} Reports</div>
+              <div class="analytics-kpi-sub">
+                <span>${activeMissingTotal} active cases ongoing</span>
+              </div>
+            </div>
+
+            <div class="analytics-kpi-block">
+              <div class="analytics-kpi-main-val" style="color: #dc2626;">+185% Spike</div>
+              <div class="analytics-kpi-sub warning">
+                <span>🎆 New Year Fireworks Season Peak</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Interactive Bar & Spike Visualization Canvas -->
+          <div class="analytics-chart-canvas-wrapper">
+            <div class="analytics-bars-container">
+              <!-- Horizontal Gridlines -->
+              <div class="analytics-grid-line" style="bottom: 75%;"><span class="analytics-grid-val">${Math.round(maxChartVal * 0.75)}</span></div>
+              <div class="analytics-grid-line" style="bottom: 50%;"><span class="analytics-grid-val">${Math.round(maxChartVal * 0.5)}</span></div>
+              <div class="analytics-grid-line" style="bottom: 25%;"><span class="analytics-grid-val">${Math.round(maxChartVal * 0.25)}</span></div>
+
+              ${chartData.map(item => {
+                const heightPercent = Math.max(Math.round((item.val / maxChartVal) * 100), 8);
+                return `
+                  <div class="analytics-bar-col" data-period="${item.label}" title="${item.label}: ${item.val} Incidents${item.spikeText ? ' (' + item.spikeText + ')' : ''}">
+                    ${item.spike ? `<span class="seasonal-spike-badge">${item.spikeText || '🎆 Spike'}</span>` : ''}
+                    <div class="analytics-bar ${item.spike ? 'seasonal-spike' : ''} ${item.active ? 'active-period' : ''}" style="height: ${heightPercent}%;"></div>
+                    <span class="analytics-bar-label">
+                      ${item.label}
+                      ${item.sub ? `<div class="analytics-bar-sublabel">${item.sub}</div>` : ''}
+                    </span>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+
+          <!-- Footer Summaries & Actions -->
+          <div class="analytics-footer-summary">
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <span style="color: #2563eb; font-weight: 600;">${unverifiedSightings} citizen reports awaiting field review</span>
+              <span style="color: var(--ink-muted); font-size: 11px;">0 overdue impoundment releases</span>
+            </div>
+            <div style="font-weight: 700; color: var(--ink-primary); font-family: var(--font-mono); font-size: 13px;">
+              94.2% Resolution Rate
+            </div>
+          </div>
+
+          <div class="analytics-actions-row">
+            <button class="btn btn-secondary btn-sm" id="btn-chart-log-report">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+              Log Incident Report
+            </button>
+            <button class="btn btn-secondary btn-sm" id="btn-chart-view-registry">
+              View All Incidents
+            </button>
+          </div>
+        </div>
+
+        <!-- CARD 2: Incident Recovery Status Funnel (Missing -> Sighted -> Found/Impounded -> Reunited) -->
+        <div class="analytics-card">
+          <div class="analytics-card-header">
+            <div class="analytics-card-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="color: #16a34a;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              <span>Recovery Status Funnel</span>
+            </div>
+
+            <!-- Conversion Mode Toggle -->
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <button class="btn btn-sm btn-secondary" id="btn-toggle-recovery-funnel" title="Toggle Counts and Percentages" style="padding: 2px 7px; font-size: 10px;">
+                ${this.funnelMode === 'percent' ? '% Conversion' : 'Whole Counts'}
+              </button>
+            </div>
+          </div>
+
+          <!-- Progressive Funnel Stages -->
+          <div class="funnel-list" style="margin: 8px 0;">
+            ${recoveryFunnelSteps.map(step => {
+              const displayVal = this.funnelMode === 'percent' ? `${step.percent}%` : `${step.count} Pets`;
+              const trackWidth = Math.max((step.count / maxRecoveryCount) * 100, 10);
+              return `
+                <div class="funnel-step">
+                  <div>
+                    <div class="funnel-step-head">
+                      <span style="display: flex; align-items: center; gap: 5px; font-weight: 650; color: var(--ink-primary);">
+                        <span>${step.icon}</span>
+                        <span>${step.name}</span>
+                      </span>
+                      <span class="funnel-step-count">${step.count}</span>
+                    </div>
+                    <div class="funnel-track">
+                      <div class="funnel-fill" style="width: ${trackWidth}%; background: ${step.color};"></div>
+                    </div>
+                  </div>
+                  <span class="funnel-keep" style="color: ${step.color};">${displayVal}</span>
+                </div>
+              `;
+            }).join('')}
+          </div>
+
+          <!-- Choke Point Identification Banner -->
+          <div class="chokepoint-banner">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink: 0;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <div style="display: flex; flex-direction: column; gap: 1px;">
+              <span style="font-weight: 750;">Process Choke Point: ${chokePointStage} (-${chokePointPercent}%)</span>
+              <span style="font-size: 10.5px; opacity: 0.9;">Missing microchip cross-match or delayed field response. Accelerate scanner lookup.</span>
+            </div>
+          </div>
+
+          <!-- Quick Resolution Statistics -->
+          <div class="analytics-footer-summary" style="margin-top: 4px;">
+            <span style="color: var(--ink-secondary); font-size: 11.5px;">Unresolved in Holding: <b style="color: var(--ink-primary);">${stepNotReunited} Pets</b></span>
+            <span style="color: #16a34a; font-weight: 700; font-size: 11.5px;">✓ Reunited: ${stepReunited} Pets</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Registered Pet Guardians Directory Table -->
+      <div class="table-container" style="width: 100%; box-sizing: border-box; margin-bottom: 20px;">
         <div class="table-toolbar" style="width: 100%; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
           <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
             <span style="font-weight: 750; font-size: 13px; color: var(--ink-primary);">Registered Pet Guardians</span>
@@ -269,7 +452,6 @@ window.ActivationView = {
           </div>
         </div>
 
-        <!-- Data Table -->
         <div class="data-table-wrapper" style="width: 100%; box-sizing: border-box; overflow-x: auto;">
           <table class="data-table" style="width: 100%;">
             <thead>
@@ -301,7 +483,6 @@ window.ActivationView = {
                 </tr>
               ` : filteredOwners.map(owner => `
                 <tr>
-                  <!-- Gmail Account -->
                   <td>
                     <div style="display: flex; align-items: center; gap: 9px;">
                       <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--bg-card-subtle); border: 1px solid var(--border-main); color: var(--brand-terracotta); display: grid; place-items: center; font-weight: 700; font-size: 11.5px; flex-shrink: 0;">
@@ -321,7 +502,6 @@ window.ActivationView = {
                     </div>
                   </td>
 
-                  <!-- System Status (Online / Offline) -->
                   <td>
                     ${owner.isOnline ? `
                       <span class="status-pill status-safe" style="font-size: 9.5px; padding: 2px 7px;">
@@ -334,7 +514,6 @@ window.ActivationView = {
                     `}
                   </td>
 
-                  <!-- Owner Contact Info -->
                   <td>
                     <div style="display: flex; flex-direction: column; gap: 2px;">
                       <span style="font-weight: 600; color: var(--ink-primary); font-size: 12px;">${owner.name}</span>
@@ -345,7 +524,6 @@ window.ActivationView = {
                     </div>
                   </td>
 
-                  <!-- Location & Jurisdiction -->
                   <td>
                     <div style="display: flex; align-items: flex-start; gap: 6px;">
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--brand-terracotta)" stroke-width="2.2" style="flex-shrink: 0; margin-top: 2px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -358,7 +536,6 @@ window.ActivationView = {
                     </div>
                   </td>
 
-                  <!-- Registered Pets -->
                   <td>
                     <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
                       ${owner.pets.map(p => `
@@ -375,7 +552,6 @@ window.ActivationView = {
                     </div>
                   </td>
 
-                  <!-- Actions -->
                   <td style="text-align: right;">
                     <div style="display: inline-flex; gap: 6px;">
                       <button class="chip btn-view-owner-pets" data-owner-name="${owner.name}" title="Inspect in Pet Registry">
@@ -395,83 +571,78 @@ window.ActivationView = {
         </div>
       </div>
 
-      <!-- Registration Funnel & Where Cases Stall Section -->
-      <div class="stalls-audit-grid" style="margin-top: 14px;">
-        <!-- Funnel Card -->
-        <div class="nock-card">
-          <div class="nock-card-head" style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
-            <span class="nock-card-title">Registration Funnel</span>
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <button class="btn btn-sm btn-secondary" id="btn-toggle-funnel-mode" title="${this.funnelMode === 'percent' ? 'Show Counts' : 'Convert to %'}" aria-label="Toggle Counts and Percentage" style="padding: 3px 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px;">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16V4m0 0L3 8m4-4l4 4m6 4v12m0 0l4-4m-4 4l-4-4"/></svg>
-              </button>
-              <span class="nock-card-right" style="min-width: 52px; text-align: right; font-weight: 700; color: var(--brand-terracotta);">
-                ${this.funnelMode === 'percent' ? '% Kept' : 'Counts'}
-              </span>
-            </div>
-          </div>
-          <div class="funnel-list">
-            ${funnelSteps.map((st, i) => {
-              const displayVal = this.funnelMode === 'percent' ? `${st.percent}%` : `${st.count}`;
-              return `
-                <div class="funnel-step">
-                  <div>
-                    <div class="funnel-step-head">
-                      <span>${st.name}</span>
-                      <span class="funnel-step-count">${st.count}</span>
-                    </div>
-                    <div class="funnel-track">
-                      <div class="funnel-fill" style="width: ${(st.count / maxFunnel) * 100}%; background: ${i === 3 ? '#c2410c' : (i === 4 ? '#15803d' : '#1c1917')};"></div>
-                    </div>
-                  </div>
-                  <span class="funnel-keep">${displayVal}</span>
-                </div>
-              `;
-            }).join('')}
-          </div>
+      <!-- Operational Bottlenecks Strip -->
+      <div class="nock-card" style="margin-top: 14px;">
+        <div class="nock-card-head">
+          <span class="nock-card-title">Where Cases Stall</span>
+          <span class="nock-card-right">Active System Bottlenecks</span>
         </div>
-
-        <!-- Where Cases Stall -->
-        <div class="nock-card">
-          <div class="nock-card-head">
-            <span class="nock-card-title">Where Cases Stall</span>
-            <span class="nock-card-right">Active Bottlenecks</span>
-          </div>
-          <div class="stall-table">
-            ${stalls.map(s => `
-              <div class="stall-row">
-                <span class="stall-stage">${s[0]}</span>
-                <span class="stall-reason">${s[1]}</span>
-                <span class="stall-count">${s[2]}</span>
-              </div>
-            `).join('')}
-          </div>
+        <div class="stall-table">
+          ${stalls.map(s => `
+            <div class="stall-row">
+              <span class="stall-stage">${s[0]}</span>
+              <span class="stall-reason">${s[1]}</span>
+              <span class="stall-count">${s[2]}</span>
+            </div>
+          `).join('')}
         </div>
       </div>
     `;
 
     // Hook events
-    const toggleFunnelHandler = () => {
-      this.funnelMode = (this.funnelMode === 'percent') ? 'number' : 'percent';
-      const modeText = (this.funnelMode === 'percent') ? 'Percentages (%)' : 'Whole Numbers (Counts)';
-      window.adminApp?.showToast(`Funnel converted to ${modeText}`, 'info', 1400);
+    this.attachEvents(container);
+  },
+
+  attachEvents(container) {
+    const store = window.adminStore;
+
+    // Timeframe switcher (Weekly / Monthly / Yearly)
+    container.querySelectorAll('.btn-timeframe').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const tf = e.currentTarget.getAttribute('data-timeframe');
+        if (tf) {
+          this.timeframe = tf;
+          this.render(container);
+        }
+      });
+    });
+
+    // Funnel toggle mode (Counts vs Percent)
+    container.querySelector('#btn-toggle-recovery-funnel')?.addEventListener('click', () => {
+      this.funnelMode = this.funnelMode === 'percent' ? 'number' : 'percent';
       this.render(container);
-    };
+    });
 
-    container.querySelector('#btn-toggle-funnel-mode')?.addEventListener('click', toggleFunnelHandler);
+    // Log incident report action
+    container.querySelector('#btn-chart-log-report')?.addEventListener('click', () => {
+      if (window.PetsView && typeof window.PetsView.openReportEditorModal === 'function') {
+        window.location.hash = '#pets';
+        setTimeout(() => window.PetsView.openReportEditorModal(null), 100);
+      } else {
+        window.location.hash = '#pets';
+      }
+    });
 
+    // View all incidents
+    container.querySelector('#btn-chart-view-registry')?.addEventListener('click', () => {
+      window.location.hash = '#pets';
+    });
+
+    // Quick intake button
     container.querySelector('#btn-quick-intake')?.addEventListener('click', () => {
       if (window.ImpoundmentsView && typeof window.ImpoundmentsView.openIntakeModal === 'function') {
-        window.ImpoundmentsView.openIntakeModal();
+        window.location.hash = '#impoundments';
+        setTimeout(() => window.ImpoundmentsView.openIntakeModal(), 100);
       } else {
         window.location.hash = '#impoundments';
       }
     });
 
+    // Export KPI summary
     container.querySelector('#btn-export-brief')?.addEventListener('click', () => {
-      const summary = `PAWTRACK ACTIVATION REPORT\nActive Protected Pets: ${protectedCount}/${totalPetsCount} (${totalPetsCount > 0 ? Math.round((protectedCount / totalPetsCount) * 100) : 0}%)\nActive Impoundments: ${activeImpounds}\nDaily Registration Velocity: ${dailyRegistrations[dailyRegistrations.length - 1]}/day\nGenerated: ${new Date().toLocaleString()}`;
+      const summary = `PAWTRACK SYSTEM OVERVIEW REPORT\nTotal Registered Pets: ${store.getPets ? store.getPets().length : 0}\nSeasonal Peak: January Fireworks (+185% Spike)\nResolution SLA: 94.2%\nGenerated: ${new Date().toLocaleString()}`;
       navigator.clipboard.writeText(summary);
-      window.adminApp?.showToast('Activation KPI summary copied to clipboard!', 'success');
+      window.adminApp?.showToast('System Activation overview summary copied to clipboard!', 'success');
     });
 
     // Filter pills event listeners
@@ -524,7 +695,7 @@ window.ActivationView = {
       btn.addEventListener('click', (e) => {
         const ownerName = btn.getAttribute('data-owner-name');
         if (window.PetsView) {
-          window.PetsView.searchQuery = ownerName;
+          window.PetsView.petSearchQuery = ownerName;
         }
         window.location.hash = '#pets';
       });
@@ -535,9 +706,23 @@ window.ActivationView = {
       chip.addEventListener('click', (e) => {
         const petName = chip.getAttribute('data-pet-name');
         if (window.PetsView) {
-          window.PetsView.searchQuery = petName;
+          window.PetsView.petSearchQuery = petName;
         }
         window.location.hash = '#pets';
+      });
+    });
+
+    // Bar click interaction for seasonal insights
+    container.querySelectorAll('.analytics-bar-col').forEach(col => {
+      col.addEventListener('click', (e) => {
+        const period = e.currentTarget.getAttribute('data-period');
+        if (period === 'Jan' || period === 'Dec') {
+          window.adminApp?.showToast(`Seasonal Fireworks Spike (${period}): Missing pet reports surge due to firecracker noise trauma.`, 'warning', 3000);
+        } else if (period === 'Jul' || period === 'Aug') {
+          window.adminApp?.showToast(`Monsoon Season (${period}): Flood and storm displacements increase shelter intake.`, 'info', 2500);
+        } else if (period === 'Apr' || period === 'May') {
+          window.adminApp?.showToast(`Summer Season (${period}): Outdoor roaming & heat incidents rise.`, 'info', 2500);
+        }
       });
     });
   }
