@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PawTrack · Admin Console (Nock Activation)</title>
+  <meta name="description" content="Municipal Pet Recovery & Impoundment Administration Gateway — Connected to PawTrack" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="css/admin.css" />
+  <link rel="stylesheet" href="css/components.css" />
+</head>
+<body>
+  <div id="app-layout">
+    <!-- Nock Sidebar Shell -->
+    <aside class="nock-sidebar">
+      <div class="nock-brand-row">
+        <span class="brand-badge">P</span>
+        <div class="brand-text">
+          <span class="brand-title">PawTrack</span>
+          <span class="brand-sub">Admin Console</span>
+        </div>
+      </div>
+
+      <div class="workspace-chip" id="workspace-selector" title="Active Municipal Jurisdiction">
+        <div style="display: flex; align-items: center; min-width: 0;">
+          <span class="workspace-dot"></span>
+          <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">pawtrack-metro-manila</span>
+        </div>
+        <span style="font-size: 9px; color: var(--ink-muted); margin-left: 4px;">▾</span>
+      </div>
+
+      <div class="nav-scrollable">
+        <!-- Group 1: Analyze -->
+        <div class="nav-group">
+          <div class="nav-group-label">Analyze</div>
+          <div class="nav-item active" data-route="activation">
+            <span class="nav-item-text">Activation Overview</span>
+            <span class="nav-badge">Live</span>
+          </div>
+        </div>
+
+        <!-- Group 2: Operate -->
+        <div class="nav-group">
+          <div class="nav-group-label">Operate</div>
+          <div class="nav-item" data-route="pets">
+            <span class="nav-item-text">Pet Registry</span>
+            <span class="nav-badge" id="badge-pets-count" style="display: none;"></span>
+          </div>
+
+          <div class="nav-item" data-route="impoundments">
+            <span class="nav-item-text">Impoundment Queue</span>
+            <span class="nav-badge" id="badge-impounds-count" style="display: none;"></span>
+          </div>
+
+          <div class="nav-item" data-route="notifs">
+            <span class="nav-item-text">Broadcast Alerts</span>
+            <span class="nav-badge" id="badge-notifs-count" style="display: none;"></span>
+          </div>
+        </div>
+
+        <!-- Group 3: Infrastructure -->
+        <div class="nav-group">
+          <div class="nav-group-label">Infrastructure</div>
+          <div class="nav-item" data-route="shelters">
+            <span class="nav-item-text">Municipal Shelters</span>
+          </div>
+
+          <div class="nav-item" data-route="rfid">
+            <span class="nav-item-text">RFID Hardware</span>
+          </div>
+        </div>
+
+        <!-- Group 4: Administer -->
+        <div class="nav-group">
+          <div class="nav-group-label">Administer</div>
+          <div class="nav-item" data-route="settings">
+            <span class="nav-item-text">System Settings</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Operator Footer -->
+      <div class="sidebar-footer">
+        <div class="operator-info">
+          <div class="operator-name">Super Admin</div>
+          <div class="operator-role">LGU Animal Welfare</div>
+        </div>
+        <div class="operator-actions">
+          <button class="icon-btn-subtle" title="Open PawTrack User App" id="btn-open-user-app">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/></svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Stage Viewport -->
+    <main class="main-stage">
+      <!-- Topbar Header -->
+      <header class="nock-topbar">
+        <div class="global-search-trigger" id="global-search-trigger">
+          <div class="search-placeholder">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <span>Jump to pet, RFID, or action…</span>
+          </div>
+          <span class="kbd-shortcut">Ctrl+K</span>
+        </div>
+
+        <div class="topbar-right">
+          <div class="live-sync-indicator" id="live-sync-indicator-badge" title="Live bidirectional PawTrack database synchronization">
+            <span class="pulse-emerald" id="live-sync-indicator-dot"></span>
+            <span id="live-sync-indicator-text">Realtime Store Synced</span>
+          </div>
+
+          <button class="chip" id="btn-topbar-open-owner" title="Launch Pet Owner Portal (Port 3000)">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/></svg>
+            <span>Pet Owner App ↗</span>
+          </button>
+
+          <button class="chip" id="btn-topbar-period">
+            <span>15–29 Aug ▾</span>
+          </button>
+
+          <!-- Super Admin Avatar Dropdown -->
+          <div class="admin-user-menu-wrapper" id="admin-user-menu-wrapper">
+            <div class="admin-avatar-btn" id="admin-avatar-trigger" title="Super Admin Account (Click for Menu)">
+              SA
+            </div>
+
+            <div class="admin-user-dropdown" id="admin-user-dropdown">
+              <div class="admin-user-dropdown-header">
+                <div class="admin-dropdown-avatar">SA</div>
+                <div class="admin-dropdown-user-info">
+                  <div class="admin-dropdown-name">Super Admin</div>
+                  <div class="admin-dropdown-role">LGU Animal Welfare</div>
+                  <div class="admin-dropdown-jurisdiction">📍 Metro Manila (NCR)</div>
+                </div>
+              </div>
+
+              <div class="admin-user-dropdown-divider"></div>
+
+              <div class="admin-user-dropdown-menu">
+                <button class="admin-dropdown-item" id="menu-btn-config">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                  <span>System Configuration</span>
+                </button>
+                <button class="admin-dropdown-item" id="menu-btn-owner-app">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/></svg>
+                  <span>Pet Owner Portal ↗</span>
+                </button>
+              </div>
+
+              <div class="admin-user-dropdown-divider"></div>
+
+              <div class="admin-user-dropdown-footer">
+                <button class="admin-dropdown-logout-btn" id="admin-logout-btn">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+                  <span>Lock & Log Out</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Dynamic View Container -->
+      <div class="view-viewport" id="view-container">
+        <!-- Rendered by AdminApp -->
+      </div>
+    </main>
+  </div>
+
+  <!-- Slideout Drawer Container -->
+  <div class="drawer-backdrop" id="app-drawer-backdrop">
+    <div class="drawer-panel" id="app-drawer-panel">
+      <!-- Injected dynamically -->
+    </div>
+  </div>
+
+  <!-- Modal Container -->
+  <div class="modal-backdrop" id="app-modal-backdrop">
+    <div class="modal-box" id="app-modal-box">
+      <!-- Injected dynamically -->
+    </div>
+  </div>
+
+  <!-- Command Palette (Ctrl+K) -->
+  <div class="command-palette-backdrop" id="command-palette-backdrop">
+    <div class="command-palette-box">
+      <div class="command-input-row">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--ink-muted);"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" id="command-palette-input" placeholder="Type a command, pet name, or jump to section..." />
+        <span class="kbd-shortcut">ESC</span>
+      </div>
+      <div class="command-list" id="command-palette-list">
+        <!-- Commands & Pets rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Access Gate Modal (Optional Security Modal) -->
+  <div class="modal-backdrop" id="admin-gate-backdrop" style="display: none; opacity: 0; pointer-events: none; z-index: 999; background: rgba(28, 25, 23, 0.85); backdrop-filter: blur(8px);">
+    <div class="modal-box" style="max-width: 420px; text-align: center; padding: 28px 24px; border: 1px solid var(--border-main); box-shadow: var(--shadow-modal); background: #ffffff;">
+      <div style="width: 48px; height: 48px; border-radius: 12px; background: var(--brand-terracotta); color: #fff; display: grid; place-items: center; font-size: 20px; font-weight: 800; margin: 0 auto 16px;">
+        P
+      </div>
+      <h2 style="font-size: 18px; font-weight: 800; letter-spacing: -0.03em; margin: 0 0 6px; color: var(--ink-primary);">PawTrack Admin Console</h2>
+      <p style="font-size: 12px; color: var(--ink-muted); margin: 0 0 20px;">Restricted Municipal Gateway — Authorized Animal Welfare Personnel Only</p>
+
+      <form id="admin-login-form" style="display: flex; flex-direction: column; gap: 12px; text-align: left;">
+        <div class="form-group">
+          <label class="form-label">Admin Passcode / Municipal Key</label>
+          <input type="password" id="admin-pass-input" class="form-control" placeholder="Enter admin passcode" style="padding: 10px 12px; font-size: 14px;" required />
+        </div>
+        <div id="admin-gate-error" style="display: none; font-size: 11px; color: var(--color-red); font-weight: 600;">
+          Invalid passcode. Please enter valid administrative credentials.
+        </div>
+        <button type="submit" class="btn btn-primary" style="padding: 11px; font-size: 13px; font-weight: 700; width: 100%; justify-content: center; margin-top: 4px;">
+          Unlock Municipal Console
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="js/admin-store.js"></script>
+  <script src="js/views/activation-view.js"></script>
+  <script src="js/views/pets-view.js"></script>
+  <script src="js/views/impoundments-view.js"></script>
+  <script src="js/views/shelters-view.js"></script>
+  <script src="js/views/rfid-view.js"></script>
+  <script src="js/views/notifs-view.js"></script>
+  <script src="js/views/settings-view.js"></script>
+  <script src="js/admin-app.js"></script>
+</body>
+</html>

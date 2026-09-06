@@ -1,0 +1,20 @@
+{
+  "name": "pawtrack-admin",
+  "version": "1.0.0",
+  "description": "PawTrack Municipal Admin Console (Nock Activation Visual Direction)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "sync": "node scripts/auto-sync.js",
+    "test": "node tests/verify-sync.js",
+    "test:all": "node tests/verify-sync.js && node tests/test-responsive-layout.js && node tests/test-buttons-dom.js",
+    "test:buttons": "node tests/test-buttons-dom.js",
+    "test:responsive": "node tests/test-responsive-layout.js",
+    "test:realtime": "node tests/test-live-realtime-sync.js",
+    "verify": "node tests/verify-sync.js"
+  },
+  "keywords": ["pawtrack", "admin", "nock", "saas"],
+  "author": "",
+  "license": "ISC"
+}
+

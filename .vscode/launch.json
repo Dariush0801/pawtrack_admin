@@ -1,0 +1,35 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "🚀 Run PawTrack Admin (Auto-Start Server & Open Browser)",
+            "type": "chrome",
+            "request": "launch",
+            "url": "http://localhost:8080",
+            "webRoot": "${workspaceFolder}",
+            "preLaunchTask": "Start Admin Server"
+        },
+        {
+            "name": "🌐 Run PawTrack Admin (Edge)",
+            "type": "msedge",
+            "request": "launch",
+            "url": "http://localhost:8080",
+            "webRoot": "${workspaceFolder}",
+            "preLaunchTask": "Start Admin Server"
+        },
+        {
+            "name": "⚙️ Run & Debug Node Server (Port 8080)",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/server.js",
+            "console": "integratedTerminal",
+            "restart": true
+        },
+        {
+            "name": "📂 Open Static index.html (Offline / No Server)",
+            "type": "chrome",
+            "request": "launch",
+            "file": "${workspaceFolder}/index.html"
+        }
+    ]
+}

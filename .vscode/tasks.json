@@ -1,0 +1,41 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Start Admin Server",
+            "type": "shell",
+            "command": "node server.js",
+            "isBackground": true,
+            "problemMatcher": {
+                "pattern": {
+                    "regexp": "^$"
+                },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": ".*PawTrack.*",
+                    "endsPattern": ".*Local URL:.*http://localhost:8080.*"
+                }
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            }
+        },
+        {
+            "label": "Start All Ecosystem Servers",
+            "type": "shell",
+            "command": "cmd /c start-all.bat",
+            "isBackground": true,
+            "problemMatcher": {
+                "pattern": {
+                    "regexp": "^$"
+                },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": ".*PawTrack.*",
+                    "endsPattern": ".*LIVE.*"
+                }
+            }
+        }
+    ]
+}

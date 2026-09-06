@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Environment & Logs
+.env
+*.log
+npm-debug.log*
+
+# OS Generated Files
+.DS_Store
+Thumbs.db
+desktop.ini
+*.tmp
+
+# Editor Directories
+.idea/
+*.suo
+*.user
+
+# Vercel & Deployments
+.vercel/
+pawtrack-shared-db.json
