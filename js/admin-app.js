@@ -30,7 +30,118 @@ class AdminApp {
 
     this.updateSidebarBadges();
     this.updateSyncIndicator();
+    this.initWorkspaceSelector();
     this.initPeriodSelector();
+  }
+
+  initWorkspaceSelector() {
+    const wsTrigger = document.getElementById('workspace-selector');
+    const wsDropdown = document.getElementById('workspace-dropdown');
+    const wsLabel = document.getElementById('workspace-selector-label');
+    const jurisdictionLabel = document.querySelector('.admin-dropdown-jurisdiction');
+    const addJurisdictionBtn = document.getElementById('btn-add-jurisdiction');
+
+    if (!wsTrigger || !wsDropdown) return;
+
+    // Load persisted workspace or default
+    const savedWs = localStorage.getItem('pawtrack_active_jurisdiction') || 'pawtrack-metro-manila';
+    this.selectedJurisdiction = savedWs;
+
+    // Apply active state on initial load
+    const activeBtn = wsDropdown.querySelector(`.workspace-option-btn[data-workspace="${savedWs}"]`);
+    if (activeBtn) {
+      wsDropdown.querySelectorAll('.workspace-option-btn').forEach(b => b.classList.remove('active'));
+      activeBtn.classList.add('active');
+      if (wsLabel) wsLabel.textContent = savedWs;
+      if (jurisdictionLabel) {
+        jurisdictionLabel.textContent = activeBtn.getAttribute('data-name') || 'Metro Manila (NCR)';
+      }
+    }
+
+    // Toggle dropdown
+    wsTrigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      document.getElementById('period-dropdown')?.classList.remove('open');
+      document.getElementById('admin-user-dropdown')?.classList.remove('open');
+      const isOpen = wsDropdown.classList.toggle('open');
+      wsTrigger.classList.toggle('active', isOpen);
+      wsTrigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+
+    // Keyboard support (Enter/Space on chip)
+    wsTrigger.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        wsTrigger.click();
+      } else if (e.key === 'Escape') {
+        wsDropdown.classList.remove('open');
+        wsTrigger.classList.remove('active');
+        wsTrigger.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    // Close on outside click
+    document.addEventListener('click', (e) => {
+      if (!wsDropdown.contains(e.target) && !wsTrigger.contains(e.target)) {
+        wsDropdown.classList.remove('open');
+        wsTrigger.classList.remove('active');
+        wsTrigger.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    // Close on Escape anywhere
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && wsDropdown.classList.contains('open')) {
+        wsDropdown.classList.remove('open');
+        wsTrigger.classList.remove('active');
+        wsTrigger.setAttribute('aria-expanded', 'false');
+        wsTrigger.focus();
+      }
+    });
+
+    // Option clicks
+    wsDropdown.querySelectorAll('.workspace-option-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const wsId = btn.getAttribute('data-workspace');
+        const wsName = btn.getAttribute('data-name') || wsId;
+        const wsFull = btn.getAttribute('data-full') || wsName;
+
+        wsDropdown.querySelectorAll('.workspace-option-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        this.selectedJurisdiction = wsId;
+        localStorage.setItem('pawtrack_active_jurisdiction', wsId);
+
+        if (wsLabel) wsLabel.textContent = wsId;
+        if (jurisdictionLabel) jurisdictionLabel.textContent = wsName;
+
+        wsDropdown.classList.remove('open');
+        wsTrigger.classList.remove('active');
+        wsTrigger.setAttribute('aria-expanded', 'false');
+
+        this.showToast(`Jurisdiction switched to: ${wsFull} (${wsId})`, 'success', 2400);
+
+        // Re-render current route to reflect active jurisdiction
+        if (this.currentRoute) {
+          this.renderView(this.currentRoute);
+        }
+      });
+    });
+
+    // Connect LGU Cluster button
+    addJurisdictionBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      wsDropdown.classList.remove('open');
+      wsTrigger.classList.remove('active');
+      wsTrigger.setAttribute('aria-expanded', 'false');
+
+      const clusterName = prompt('Enter New LGU Municipal Cluster Name (e.g., Mandaluyong City Vet Services):');
+      if (clusterName && clusterName.trim()) {
+        const slug = 'pawtrack-' + clusterName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        this.showToast(`Cluster node "${slug}" registered. Authenticating LGU API bridge...`, 'info', 3000);
+      }
+    });
   }
 
   initPeriodSelector() {
@@ -48,6 +159,8 @@ class AdminApp {
     // Toggle dropdown
     periodBtn.addEventListener('click', (e) => {
       e.stopPropagation();
+      document.getElementById('workspace-dropdown')?.classList.remove('open');
+      document.getElementById('workspace-selector')?.classList.remove('active');
       document.getElementById('admin-user-dropdown')?.classList.remove('open');
       periodDropdown.classList.toggle('open');
     });
@@ -113,6 +226,8 @@ class AdminApp {
 
     avatarTrigger.addEventListener('click', (e) => {
       e.stopPropagation();
+      document.getElementById('workspace-dropdown')?.classList.remove('open');
+      document.getElementById('workspace-selector')?.classList.remove('active');
       document.getElementById('period-dropdown')?.classList.remove('open');
       dropdown.classList.toggle('open');
     });

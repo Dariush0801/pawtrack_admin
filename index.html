@@ -36,12 +36,107 @@
         </div>
       </div>
 
-      <div class="workspace-chip" id="workspace-selector" title="Active Municipal Jurisdiction">
-        <div style="display: flex; align-items: center; min-width: 0;">
-          <span class="workspace-dot"></span>
-          <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">pawtrack-metro-manila</span>
+      <!-- Municipal Jurisdiction / Workspace Selector -->
+      <div class="workspace-selector-wrapper" id="workspace-selector-wrapper" style="position: relative; margin: 0 2px 14px;">
+        <div class="workspace-chip" id="workspace-selector" title="Active Municipal Jurisdiction (Click to Switch)" tabindex="0" role="button" aria-haspopup="true" aria-expanded="false" style="margin: 0;">
+          <div style="display: flex; align-items: center; min-width: 0;">
+            <span class="workspace-dot" id="workspace-selector-dot"></span>
+            <span id="workspace-selector-label" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">pawtrack-metro-manila</span>
+          </div>
+          <span style="font-size: 9px; color: var(--ink-muted); margin-left: 4px;">▾</span>
         </div>
-        <span style="font-size: 9px; color: var(--ink-muted); margin-left: 4px;">▾</span>
+
+        <div class="workspace-dropdown" id="workspace-dropdown">
+          <div class="workspace-dropdown-header">
+            <span>Municipal Jurisdiction</span>
+            <span class="status-pill status-safe" style="font-size: 8.5px; padding: 1px 5px;">NCR Cluster</span>
+          </div>
+
+          <div class="workspace-dropdown-list">
+            <button class="workspace-option-btn active" data-workspace="pawtrack-metro-manila" data-name="Metro Manila (NCR)" data-full="Metro Manila All Sectors — Central Hub">
+              <div class="ws-opt-left">
+                <span class="ws-opt-dot live"></span>
+                <div class="ws-opt-info">
+                  <span class="ws-opt-id">pawtrack-metro-manila</span>
+                  <span class="ws-opt-name">Metro Manila (All NCR Sectors)</span>
+                </div>
+              </div>
+              <span class="ws-opt-badge">Primary Hub</span>
+            </button>
+
+            <button class="workspace-option-btn" data-workspace="pawtrack-quezon-city" data-name="Quezon City (NCR)" data-full="Quezon City Animal Care & Control">
+              <div class="ws-opt-left">
+                <span class="ws-opt-dot live"></span>
+                <div class="ws-opt-info">
+                  <span class="ws-opt-id">pawtrack-quezon-city</span>
+                  <span class="ws-opt-name">Quezon City Veterinary Dept</span>
+                </div>
+              </div>
+              <span class="ws-opt-badge">Active</span>
+            </button>
+
+            <button class="workspace-option-btn" data-workspace="pawtrack-manila-city" data-name="City of Manila (NCR)" data-full="City of Manila Veterinary Inspection Div">
+              <div class="ws-opt-left">
+                <span class="ws-opt-dot live"></span>
+                <div class="ws-opt-info">
+                  <span class="ws-opt-id">pawtrack-manila-city</span>
+                  <span class="ws-opt-name">City of Manila Animal Pound</span>
+                </div>
+              </div>
+              <span class="ws-opt-badge">Active</span>
+            </button>
+
+            <button class="workspace-option-btn" data-workspace="pawtrack-makati" data-name="Makati City (NCR)" data-full="Makati City Veterinary Services">
+              <div class="ws-opt-left">
+                <span class="ws-opt-dot live"></span>
+                <div class="ws-opt-info">
+                  <span class="ws-opt-id">pawtrack-makati</span>
+                  <span class="ws-opt-name">Makati Veterinary Services</span>
+                </div>
+              </div>
+              <span class="ws-opt-badge">Active</span>
+            </button>
+
+            <button class="workspace-option-btn" data-workspace="pawtrack-taguig" data-name="Taguig City (NCR)" data-full="Taguig City Animal Welfare Unit">
+              <div class="ws-opt-left">
+                <span class="ws-opt-dot live"></span>
+                <div class="ws-opt-info">
+                  <span class="ws-opt-id">pawtrack-taguig</span>
+                  <span class="ws-opt-name">Taguig Animal Welfare Unit</span>
+                </div>
+              </div>
+              <span class="ws-opt-badge">Active</span>
+            </button>
+
+            <button class="workspace-option-btn" data-workspace="pawtrack-pasig" data-name="Pasig City (NCR)" data-full="Pasig City Veterinary Office">
+              <div class="ws-opt-left">
+                <span class="ws-opt-dot live"></span>
+                <div class="ws-opt-info">
+                  <span class="ws-opt-id">pawtrack-pasig</span>
+                  <span class="ws-opt-name">Pasig City Animal Pound</span>
+                </div>
+              </div>
+              <span class="ws-opt-badge">Active</span>
+            </button>
+
+            <button class="workspace-option-btn" data-workspace="pawtrack-paranaque" data-name="Parañaque City (NCR)" data-full="Parañaque Veterinary Services">
+              <div class="ws-opt-left">
+                <span class="ws-opt-dot live"></span>
+                <div class="ws-opt-info">
+                  <span class="ws-opt-id">pawtrack-paranaque</span>
+                  <span class="ws-opt-name">Parañaque Vet Services</span>
+                </div>
+              </div>
+              <span class="ws-opt-badge">Active</span>
+            </button>
+          </div>
+
+          <div class="workspace-dropdown-footer">
+            <button class="btn btn-xs btn-secondary" id="btn-add-jurisdiction" style="width: 100%; justify-content: center; font-size: 11px; padding: 5px 8px; border-radius: var(--radius-sm);">
+              + Connect LGU Cluster
+            </button>
+          </div>
+        </div>
       </div>
 
       <div class="nav-scrollable">

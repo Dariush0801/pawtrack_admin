@@ -167,6 +167,11 @@ html, body {
 }
 
 /* Workspace selector */
+.workspace-selector-wrapper {
+  position: relative;
+  z-index: 50;
+}
+
 .workspace-chip {
   margin: 0 2px 14px;
   padding: 7px 10px;
@@ -180,12 +185,20 @@ html, body {
   align-items: center;
   justify-content: space-between;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: all 0.15s ease;
+  user-select: none;
+  outline: none;
 }
 
-.workspace-chip:hover {
+.workspace-chip:hover,
+.workspace-chip:focus-visible {
   background: var(--bg-hover);
   color: var(--ink-primary);
+  border-color: var(--border-light);
+}
+
+.workspace-chip.active {
+  border-color: var(--brand-terracotta);
 }
 
 .workspace-dot {
@@ -195,12 +208,172 @@ html, body {
   background: var(--color-green);
   display: inline-block;
   margin-right: 6px;
+  flex-shrink: 0;
   animation: pulse-dot 2.5s infinite ease-in-out;
 }
 
 @keyframes pulse-dot {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.4; }
+}
+
+.workspace-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 250px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-main);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-modal);
+  padding: 8px;
+  display: none;
+  flex-direction: column;
+  z-index: 1000;
+  animation: fadeInDropdown 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.workspace-dropdown.open {
+  display: flex !important;
+}
+
+.workspace-dropdown-header {
+  padding: 4px 6px 8px;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--ink-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid var(--border-light);
+  font-weight: 700;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.workspace-dropdown-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 6px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.workspace-dropdown-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.workspace-dropdown-list::-webkit-scrollbar-thumb {
+  background: var(--border-main);
+  border-radius: 4px;
+}
+
+.workspace-option-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--ink-secondary);
+  font-family: var(--font-sans);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.12s ease;
+  gap: 8px;
+}
+
+.workspace-option-btn:hover {
+  background: var(--bg-hover);
+  color: var(--ink-primary);
+  border-color: var(--border-light);
+}
+
+.workspace-option-btn.active {
+  background: var(--brand-terracotta-subtle);
+  border-color: rgba(184, 80, 56, 0.25);
+  color: var(--brand-terracotta);
+}
+
+.workspace-option-btn .ws-opt-left {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.ws-opt-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ink-muted);
+  flex-shrink: 0;
+}
+
+.ws-opt-dot.live {
+  background: var(--color-green);
+  box-shadow: 0 0 4px rgba(16, 185, 129, 0.4);
+}
+
+.workspace-option-btn.active .ws-opt-dot.live {
+  background: var(--brand-terracotta);
+  box-shadow: 0 0 4px rgba(184, 80, 56, 0.4);
+}
+
+.ws-opt-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ws-opt-id {
+  font-size: 11px;
+  font-weight: 600;
+  color: inherit;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ws-opt-name {
+  font-size: 9.5px;
+  color: var(--ink-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.workspace-option-btn.active .ws-opt-name {
+  color: var(--brand-terracotta);
+  opacity: 0.85;
+}
+
+.ws-opt-badge {
+  font-size: 8.5px;
+  font-family: var(--font-mono);
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--bg-card-subtle);
+  border: 1px solid var(--border-light);
+  color: var(--ink-muted);
+  flex-shrink: 0;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.workspace-option-btn.active .ws-opt-badge {
+  background: var(--brand-terracotta);
+  color: #fff;
+  border-color: var(--brand-terracotta);
+}
+
+.workspace-dropdown-footer {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--border-light);
 }
 
 /* Navigation Groups */
@@ -771,6 +944,7 @@ html, body {
     border-bottom: 1px solid var(--border-light);
   }
 
+  .workspace-selector-wrapper,
   .workspace-chip {
     display: none;
   }
