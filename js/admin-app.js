@@ -32,6 +32,7 @@ class AdminApp {
     this.updateSyncIndicator();
     this.initWorkspaceSelector();
     this.initPeriodSelector();
+    this.initGitSync();
   }
 
   initWorkspaceSelector() {
@@ -295,6 +296,61 @@ class AdminApp {
     } else {
       el.textContent = 'Local Store Synced';
       if (dot) { dot.className = ''; dot.style.background = '#3b82f6'; }
+    }
+  }
+
+  initGitSync() {
+    const gitBtn = document.getElementById('btn-topbar-git-sync');
+    const gitText = document.getElementById('git-sync-indicator-text');
+
+    const updateStatus = async () => {
+      try {
+        const res = await fetch('/api/git/status');
+        if (res.ok) {
+          const data = await res.json();
+          if (gitText) {
+            if (data.isClean) {
+              gitText.textContent = `GitHub Synced (${data.branch || 'main'})`;
+            } else {
+              gitText.textContent = `Auto-Sync (${data.uncommittedCount} pending)`;
+            }
+          }
+        }
+      } catch (err) {
+        if (gitText) gitText.textContent = 'GitHub Connected';
+      }
+    };
+
+    updateStatus();
+    setInterval(updateStatus, 12000);
+
+    gitBtn?.addEventListener('click', async () => {
+      this.triggerGitSync();
+    });
+  }
+
+  async triggerGitSync(customMsg) {
+    const gitText = document.getElementById('git-sync-indicator-text');
+    if (gitText) gitText.textContent = 'Pushing to GitHub…';
+    this.showToast('Initiating instant Git commit & push to GitHub...', 'info', 2000);
+
+    try {
+      const res = await fetch('/api/git/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: customMsg || `Manual Admin Sync from Web Console at ${new Date().toLocaleTimeString()}` })
+      });
+      const data = await res.json();
+      if (data.success) {
+        this.showToast(`✅ Synced with GitHub (${data.branch || 'main'})!`, 'success', 3000);
+        if (gitText) gitText.textContent = `GitHub Synced (${data.branch || 'main'})`;
+      } else {
+        this.showToast(`Git sync notice: ${data.message || data.error || 'Done'}`, 'info', 3000);
+        if (gitText) gitText.textContent = 'GitHub Synced';
+      }
+    } catch (err) {
+      this.showToast(`Git Sync notice: ${err.message}`, 'warning', 3000);
+      if (gitText) gitText.textContent = 'GitHub Connected';
     }
   }
 

@@ -11,6 +11,7 @@
     "test:buttons": "node tests/test-buttons-dom.js",
     "test:responsive": "node tests/test-responsive-layout.js",
     "test:realtime": "node tests/test-live-realtime-sync.js",
+    "test:sync": "node tests/test-git-and-owner-sync.js",
     "verify": "node tests/verify-sync.js"
   },
   "keywords": ["pawtrack", "admin", "nock", "saas"],

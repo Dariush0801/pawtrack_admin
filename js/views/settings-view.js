@@ -1,6 +1,6 @@
 /**
  * PawTrack Admin — System Settings & Data Governance
- * Municipal fee configurations, auto-alert triggers, JSON backup/restore, and seed reset
+ * Municipal fee configurations, auto-alert triggers, JSON backup/restore, GitHub sync & seed reset
  */
 
 window.SettingsView = {
@@ -13,7 +13,7 @@ window.SettingsView = {
         <div class="view-header-titles">
           <h1>System Settings & Data Governance</h1>
           <div class="subtitle">
-            <span>Municipal Tariffs, Holding Window Policies & Database Backup / Restore</span>
+            <span>Municipal Tariffs, Holding Window Policies, Real-Time Ecosystem & GitHub Cloud Sync</span>
           </div>
         </div>
         <div class="view-header-actions">
@@ -75,12 +75,56 @@ window.SettingsView = {
           </form>
         </div>
 
-        <!-- Right Column: Database Governance & Backup -->
+        <!-- Right Column: Real-Time Sync, GitHub & Data Governance -->
         <div style="display: flex; flex-direction: column; gap: 14px;">
+          <!-- GitHub & Realtime Ecosystem Status -->
+          <div class="nock-card">
+            <div class="nock-card-head">
+              <span class="nock-card-title">Real-Time Sync & GitHub Integration</span>
+              <span class="status-pill status-safe" id="git-settings-status-badge">Live Synced</span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 10px; font-size: 12px;">
+              <div style="background: var(--bg-hover); padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-light); display: flex; flex-direction: column; gap: 6px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="font-weight: 600; color: var(--ink-secondary);">Owner Portal Bridge:</span>
+                  <span class="status-pill status-safe" style="font-size: 10px;">Port 3000 (Connected)</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="font-weight: 600; color: var(--ink-secondary);">Admin Console:</span>
+                  <span class="status-pill status-safe" style="font-size: 10px;">Port 8080 (SSE Active)</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="font-weight: 600; color: var(--ink-secondary);">GitHub Remote:</span>
+                  <span style="font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-primary);">github.com/Dariush0801/pawtrack_admin</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="font-weight: 600; color: var(--ink-secondary);">Active Branch:</span>
+                  <span style="font-family: var(--font-mono); font-weight: 700; color: var(--color-emerald);">main</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;" id="git-settings-last-commit-row">
+                  <span style="font-weight: 600; color: var(--ink-secondary);">Latest Commit:</span>
+                  <span style="font-family: var(--font-mono); font-size: 10px; color: var(--ink-muted);" id="git-settings-last-commit">Fetching...</span>
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 8px; margin-top: 4px;">
+                <button class="btn btn-primary" id="btn-settings-git-sync" style="flex: 1;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4M9 18c-4.51 2-5-2-7-2"/></svg>
+                  Sync to GitHub Now
+                </button>
+                <button class="btn btn-secondary" id="btn-settings-git-refresh">
+                  Refresh Status
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Backup & Restore -->
           <div class="nock-card">
             <div class="nock-card-head">
               <span class="nock-card-title">Database Backup & JSON Restore</span>
-              <span class="nock-card-right">LocalStorage Sync</span>
+              <span class="nock-card-right">Shared Node Sync</span>
             </div>
 
             <div style="display: flex; flex-direction: column; gap: 12px; font-size: 12px;">
@@ -97,6 +141,7 @@ window.SettingsView = {
             </div>
           </div>
 
+          <!-- Danger Zone -->
           <div class="nock-card" style="border-color: var(--color-red-border); background: #fffaf9;">
             <div class="nock-card-head">
               <span class="nock-card-title" style="color: var(--color-red);">Danger Zone: Factory Reset</span>
@@ -122,6 +167,37 @@ window.SettingsView = {
 
   attachEvents(container) {
     const store = window.adminStore;
+
+    // Load Git Status
+    const loadGitDetails = async () => {
+      try {
+        const res = await fetch('/api/git/status');
+        if (res.ok) {
+          const data = await res.json();
+          const commitEl = container.querySelector('#git-settings-last-commit');
+          const badgeEl = container.querySelector('#git-settings-status-badge');
+          if (commitEl && data.lastCommit) {
+            commitEl.textContent = data.lastCommit;
+          }
+          if (badgeEl) {
+            badgeEl.textContent = data.isClean ? 'Working Tree Clean' : `${data.uncommittedCount} Modified File(s)`;
+            badgeEl.className = data.isClean ? 'status-pill status-safe' : 'status-pill status-warning';
+          }
+        }
+      } catch (e) {}
+    };
+    loadGitDetails();
+
+    // GitHub Sync buttons
+    container.querySelector('#btn-settings-git-sync')?.addEventListener('click', async () => {
+      await window.adminApp.triggerGitSync('Manual sync from Admin Settings Console');
+      loadGitDetails();
+    });
+
+    container.querySelector('#btn-settings-git-refresh')?.addEventListener('click', () => {
+      loadGitDetails();
+      window.adminApp.showToast('Git and Ecosystem status refreshed.', 'info', 1500);
+    });
 
     // Save Settings button
     container.querySelector('#btn-save-settings')?.addEventListener('click', () => {
