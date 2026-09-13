@@ -33,6 +33,7 @@ class AdminApp {
     this.initWorkspaceSelector();
     this.initPeriodSelector();
     this.initGitSync();
+    this.initSidebarToggle();
   }
 
   initWorkspaceSelector() {
@@ -715,11 +716,70 @@ class AdminApp {
     });
   }
 
+  initSidebarToggle() {
+    const collapseBtn = document.getElementById('btn-sidebar-collapse');
+    const topbarToggleBtn = document.getElementById('btn-sidebar-topbar-toggle');
+    const layout = document.getElementById('app-layout');
+
+    // Restore persisted sidebar hidden state
+    const isHidden = localStorage.getItem('pawtrack_sidebar_hidden') === 'true';
+    if (isHidden && layout) {
+      layout.classList.add('sidebar-hidden');
+    }
+    this.updateSidebarToggleUI(isHidden);
+
+    collapseBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.toggleSidebar(true);
+    });
+
+    topbarToggleBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.toggleSidebar();
+    });
+  }
+
+  toggleSidebar(forceHide) {
+    const layout = document.getElementById('app-layout');
+    if (!layout) return;
+
+    if (forceHide === true) {
+      layout.classList.add('sidebar-hidden');
+    } else if (forceHide === false) {
+      layout.classList.remove('sidebar-hidden');
+    } else {
+      layout.classList.toggle('sidebar-hidden');
+    }
+
+    const isHidden = layout.classList.contains('sidebar-hidden');
+    try {
+      localStorage.setItem('pawtrack_sidebar_hidden', isHidden ? 'true' : 'false');
+    } catch (e) {}
+
+    this.updateSidebarToggleUI(isHidden);
+    this.showToast(isHidden ? 'Navigation sidebar hidden (Press Ctrl+B to reveal)' : 'Navigation sidebar visible', 'info', 1400);
+  }
+
+  updateSidebarToggleUI(isHidden) {
+    const topbarToggleBtn = document.getElementById('btn-sidebar-topbar-toggle');
+    if (topbarToggleBtn) {
+      topbarToggleBtn.setAttribute('title', isHidden ? 'Show Navigation Sidebar (Ctrl+B)' : 'Hide Navigation Sidebar (Ctrl+B)');
+      topbarToggleBtn.setAttribute('aria-label', isHidden ? 'Show Sidebar' : 'Hide Sidebar');
+      topbarToggleBtn.setAttribute('aria-expanded', isHidden ? 'false' : 'true');
+    }
+  }
+
   initKeyboardShortcuts() {
     window.addEventListener('keydown', (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      // Ctrl+K: Global search / Command palette
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
         e.preventDefault();
         this.openCommandPalette();
+      }
+      // Ctrl+B or Ctrl+\: Toggle Navigation Sidebar
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'b' || e.key === 'B' || e.key === '\\')) {
+        e.preventDefault();
+        this.toggleSidebar();
       }
       if (e.key === 'Escape') {
         this.closeCommandPalette();
