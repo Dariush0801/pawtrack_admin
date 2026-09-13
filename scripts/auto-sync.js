@@ -39,6 +39,20 @@ function getLastCommit() {
   return log || 'No commits yet';
 }
 
+function cleanStaleLock() {
+  try {
+    const lockPath = path.join(ROOT_DIR, '.git', 'index.lock');
+    if (fs.existsSync(lockPath)) {
+      const stats = fs.statSync(lockPath);
+      // If lock file is older than 5 seconds, remove it to prevent deadlock
+      if (Date.now() - stats.mtimeMs > 5000) {
+        fs.unlinkSync(lockPath);
+        console.log(`[${new Date().toLocaleTimeString()}] 🧹 Cleaned stale .git/index.lock file`);
+      }
+    }
+  } catch (e) {}
+}
+
 function shouldIgnore(filename) {
   if (!filename) return true;
   const normalized = filename.replace(/\\/g, '/');
@@ -46,6 +60,10 @@ function shouldIgnore(filename) {
       normalized.includes('/.git') ||
       normalized.includes('node_modules') ||
       normalized.includes('.vercel') ||
+      normalized.includes('.vscode') ||
+      normalized.includes('.gemini') ||
+      normalized.includes('.agents') ||
+      normalized.includes('.system_generated') ||
       normalized.endsWith('.log') ||
       normalized.endsWith('.tmp') ||
       normalized.includes('pawtrack-shared-db.json') ||
@@ -100,6 +118,7 @@ function performSync(customMessage) {
       changedFiles.forEach(f => console.log(`   • ${f}`));
     }
 
+    cleanStaleLock();
     runGit('git add -A');
     const commitResult = runGit(`git commit -m "${commitMsg.replace(/"/g, '\\"')}"`);
     console.log(`[${new Date().toLocaleTimeString()}] 📦 Committed: ${commitMsg}`);
