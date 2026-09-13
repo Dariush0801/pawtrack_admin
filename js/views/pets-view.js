@@ -184,11 +184,11 @@ window.PetsView = {
         </div>
       </div>
 
-      <!-- Section 2: Unregistered Reports (Found / Stray) -->
+      <!-- Section 2: Community Stray & Sighting Reports -->
       <div class="table-container">
         <div class="table-toolbar">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-weight: 700; font-size: 13px; color: var(--ink-primary);">Unregistered Reports (Found / Stray)</span>
+            <span style="font-weight: 700; font-size: 13px; color: var(--ink-primary);">Community Stray & Sighting Reports</span>
           </div>
 
           <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">
@@ -224,9 +224,9 @@ window.PetsView = {
               ${displayReports.length === 0 ? `
                 <tr>
                   <td colspan="6" style="text-align: center; padding: 36px 24px; color: var(--ink-muted);">
-                    <div style="font-weight: 700; color: var(--ink-primary); font-size: 13.5px; margin-bottom: 4px;">No Unregistered Stray Reports Found</div>
+                    <div style="font-weight: 700; color: var(--ink-primary); font-size: 13.5px; margin-bottom: 4px;">No Stray or Sighting Reports Found</div>
                     <div style="font-size: 12px; max-width: 480px; margin: 0 auto; line-height: 1.5; color: var(--ink-muted);">
-                      Stray and found pet reports submitted by citizens on the Owner App (<b>http://localhost:3000</b>) or Public Lost & Found map will appear here live in real-time.
+                      There are currently no active stray animal reports or community sightings. Reports submitted by citizens via the Pet Owner Portal or Community Map will appear here in real-time.
                     </div>
                   </td>
                 </tr>
