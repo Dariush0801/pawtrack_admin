@@ -104,7 +104,7 @@ window.ImpoundmentsView = {
                   <td colspan="6" style="text-align: center; padding: 48px 24px; color: var(--ink-muted);">
                     <div style="font-weight: 700; color: var(--ink-primary); font-size: 14px; margin-bottom: 4px;">No Active Impoundment Cases (Queue Empty)</div>
                     <div style="font-size: 12px; max-width: 480px; margin: 0 auto; line-height: 1.5; color: var(--ink-muted);">
-                      There are no pets currently logged in the 72-hour quarantine holding queue. All kennel bays across Quezon City, Manila, and Pasig are clear.
+                      There are no pets currently logged in the 72-hour quarantine holding queue. All kennel bays across Quezon City municipal shelters and impound facilities are clear.
                     </div>
                   </td>
                 </tr>

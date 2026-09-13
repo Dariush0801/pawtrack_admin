@@ -75,8 +75,9 @@ window.NotifsView = {
                       : '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>')}
                 </span>
                 <div style="display: flex; flex-direction: column; gap: 3px;">
-                  <div style="display: flex; align-items: center; gap: 8px;">
+                  <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                     <b style="font-size: 13px; color: var(--ink-primary);">${n.title}</b>
+                    ${n.targetAudience ? `<span class="status-pill status-safe" style="font-size: 9px; padding: 1px 6px;">📍 ${n.targetAudience}</span>` : ''}
                     ${!n.read ? `<span class="status-pill status-impounded" style="font-size: 8.5px; padding: 1px 5px;">UNREAD</span>` : ''}
                   </div>
                   <p style="font-size: 12px; color: var(--ink-secondary); margin: 0; line-height: 1.4;">${n.message}</p>
@@ -126,7 +127,7 @@ window.NotifsView = {
 
     const modalHtml = `
       <div class="modal-header">
-        <div class="nock-card-title">Compose Emergency Broadcast</div>
+        <div class="nock-card-title">Compose Emergency Broadcast (Quezon City)</div>
         <button class="icon-btn-subtle" id="broadcast-close-btn">&times;</button>
       </div>
       <div class="modal-body">
@@ -148,23 +149,26 @@ window.NotifsView = {
 
           <div class="form-group form-full">
             <label class="form-label">Notification Body Message *</label>
-            <textarea class="form-control" name="message" id="broadcast-msg" placeholder="Write message to all registered pet owners..." required style="min-height: 90px;"></textarea>
+            <textarea class="form-control" name="message" id="broadcast-msg" placeholder="Write message to registered Quezon City pet owners..." required style="min-height: 90px;"></textarea>
           </div>
 
           <div class="form-group form-full">
-            <label class="form-label">Broadcast Target Audience</label>
-            <select class="form-control" name="target">
-              <option value="all">All Registered Pet Owners (Broadcast)</option>
-              <option value="quezon_city">Quezon City Residents Only</option>
-              <option value="manila">Manila City Residents Only</option>
-              <option value="pasig">Pasig City Residents Only</option>
+            <label class="form-label">Broadcast Target Audience (Quezon City Districts)</label>
+            <select class="form-control" name="target" id="broadcast-target">
+              <option value="qc_all">All Registered Pet Owners (Quezon City Wide)</option>
+              <option value="qc_d1">District 1 (La Loma, SFDM, Balingasa, Project 6, Santa Teresita)</option>
+              <option value="qc_d2">District 2 (Batasan Hills, Payatas, Commonwealth, Bagong Silangan, Holy Spirit)</option>
+              <option value="qc_d3">District 3 (Cubao, Quirino, Project 4, Loyola Heights, Libis, E. Rodriguez)</option>
+              <option value="qc_d4">District 4 (Diliman, New Manila, South Triangle, Teachers Village, Tomas Morato)</option>
+              <option value="qc_d5">District 5 (Novaliches, Fairview, Gulod, San Bartolome, Greater Lagro)</option>
+              <option value="qc_d6">District 6 (Balintawak, Tandang Sora, Pasong Tamo, Culiat, Talipapa, Sauyo)</option>
             </select>
           </div>
         </form>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" id="broadcast-cancel-btn">Cancel</button>
-        <button class="btn btn-primary" id="broadcast-send-btn">Dispatch to All Owners</button>
+        <button class="btn btn-primary" id="broadcast-send-btn">Dispatch to QC Owners</button>
       </div>
     `;
 
@@ -177,14 +181,14 @@ window.NotifsView = {
     presetSelect?.addEventListener('change', () => {
       const val = presetSelect.value;
       if (val === 'flood') {
-        titleInput.value = 'Typhoon Alert: Municipal Pet Safety Protocol';
-        msgInput.value = 'Due to rising flood waters in low-lying areas, please keep all tagged pets indoors and ensure RFID collars are fastened.';
+        titleInput.value = 'Typhoon Alert: Quezon City Pet Safety Protocol';
+        msgInput.value = 'Due to rising water levels in low-lying areas and waterways across Quezon City, please keep all tagged pets indoors and verify RFID collars.';
       } else if (val === 'rabies') {
         titleInput.value = 'Notice: Free Anti-Rabies Vaccination Drive';
-        msgInput.value = 'Free rabies booster shots and microchip scanning available at the City Hall Veterinary Extension this Saturday 8AM-3PM.';
+        msgInput.value = 'Free rabies booster shots and microchip registration available at Quezon City Animal Care & Adoption Facility (Payatas) this Saturday 8AM-3PM.';
       } else if (val === 'pound') {
         titleInput.value = 'Advisory: Animal Control Field Operations Active';
-        msgInput.value = 'Animal Control units are conducting stray monitoring in District 4. Please ensure all registered pets remain within private premises.';
+        msgInput.value = 'Quezon City Animal Control units are conducting stray monitoring operations. Please ensure all registered pets remain within private premises.';
       }
     });
 
@@ -198,15 +202,20 @@ window.NotifsView = {
         return;
       }
       const formData = new FormData(form);
+      const targetSelect = form.querySelector('#broadcast-target');
+      const targetVal = formData.get('target');
+      const targetLabel = targetSelect?.options[targetSelect.selectedIndex]?.text || 'Quezon City Wide';
 
       store.addNotification({
         type: 'broadcast',
         title: formData.get('title'),
-        message: formData.get('message')
+        message: formData.get('message'),
+        target: targetVal,
+        targetAudience: targetLabel
       });
 
       window.adminApp.closeModal();
-      window.adminApp.showToast('Emergency broadcast dispatched successfully!', 'success');
+      window.adminApp.showToast('Emergency broadcast dispatched to Quezon City owners!', 'success');
       window.adminApp.renderView('notifs');
     });
   }
