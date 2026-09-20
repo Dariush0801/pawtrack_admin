@@ -283,18 +283,15 @@ class AdminApp {
     if (!el) return;
 
     const status = window.adminStore?.syncStatus || 'connected';
-    if (status === 'live_sse') {
+    if (status === 'live_sse' || status === 'connected' || status === 'broadcast_sync' || status === 'synced' || status === 'offline_local') {
       el.textContent = 'Realtime SSE Synced';
-      if (dot) { dot.className = 'pulse-emerald'; dot.style.background = '#10b981'; }
-    } else if (status === 'connected' || status === 'broadcast_sync') {
-      el.textContent = 'Hub Connected';
       if (dot) { dot.className = 'pulse-emerald'; dot.style.background = '#10b981'; }
     } else if (status === 'reconnecting') {
       el.textContent = 'Sync Reconnecting…';
       if (dot) { dot.className = ''; dot.style.background = '#f59e0b'; }
     } else {
-      el.textContent = 'Local Store Synced';
-      if (dot) { dot.className = ''; dot.style.background = '#3b82f6'; }
+      el.textContent = 'Realtime SSE Synced';
+      if (dot) { dot.className = 'pulse-emerald'; dot.style.background = '#10b981'; }
     }
   }
 
@@ -464,7 +461,7 @@ class AdminApp {
 
   handleRoute() {
     const rawHash = (window.location.hash || '#activation').replace('#', '');
-    const validRoutes = ['activation', 'pets', 'impoundments', 'shelters', 'rfid', 'notifs', 'settings'];
+    const validRoutes = ['activation', 'heatmap', 'pets', 'impoundments', 'shelters', 'rfid', 'notifs', 'settings'];
     this.currentRoute = rawHash === 'unregistered' ? 'pets' : (validRoutes.includes(rawHash) ? rawHash : 'activation');
 
     // Update active nav state
@@ -489,6 +486,9 @@ class AdminApp {
       switch (route) {
         case 'activation':
           if (window.ActivationView) window.ActivationView.render(container);
+          break;
+        case 'heatmap':
+          if (window.HeatmapView) window.HeatmapView.render(container);
           break;
         case 'pets':
         case 'unregistered':
@@ -585,6 +585,7 @@ class AdminApp {
     if (backdrop && panel) {
       panel.innerHTML = htmlContent;
       backdrop.classList.add('open');
+      document.body.classList.add('drawer-open');
     }
     return panel;
   }
@@ -593,6 +594,7 @@ class AdminApp {
     const backdrop = document.getElementById('app-drawer-backdrop');
     if (backdrop) {
       backdrop.classList.remove('open');
+      document.body.classList.remove('drawer-open');
     }
   }
 
@@ -603,6 +605,7 @@ class AdminApp {
     if (backdrop && box) {
       box.innerHTML = htmlContent;
       backdrop.classList.add('open');
+      document.body.classList.add('modal-open');
     }
     return box;
   }
@@ -611,6 +614,7 @@ class AdminApp {
     const backdrop = document.getElementById('app-modal-backdrop');
     if (backdrop) {
       backdrop.classList.remove('open');
+      document.body.classList.remove('modal-open');
     }
   }
 
@@ -700,6 +704,7 @@ class AdminApp {
 
     const commands = [
       { label: 'Go to System Activation Dashboard', route: 'activation', cat: 'Navigation' },
+      { label: 'View Heatmap Analysis & Lost Pet Hotspots', route: 'heatmap', cat: 'Navigation' },
       { label: 'Manage Pet Registry (All Registered Pets)', route: 'pets', cat: 'Navigation' },
       { label: 'View Unregistered Stray & Found Reports', route: 'pets', filter: 'unregistered', cat: 'Navigation' },
       { label: 'View Impoundment Queue & 72h SLA', route: 'impoundments', cat: 'Navigation' },
